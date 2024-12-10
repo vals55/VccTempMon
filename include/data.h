@@ -3,10 +3,14 @@
 #pragma once
 
 #include <Arduino.h>
-
-struct Data {
+#include "config.h"
+struct Measurements {
     float voltage;
     float temp;
-    float version;
     uint16_t count;
+};
+
+struct Data {
+    BoardConfig conf;
+    Measurements data;
 };

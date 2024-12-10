@@ -6,10 +6,12 @@
 #include <rlog.h>
 #include "data.h"
 #include "http.h"
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include "sensor.h"
+#include "wifi.h"
 
-#define VERSION 0.1f
+#define BUTTON 15
+#define BTN_HOLD_SETUP 5000
+#define BTN_CLICK 200
 
 #define OTA_DISABLE
 #ifndef OTA_DISABLE
@@ -33,26 +35,36 @@ uint8_t attempt = 0;
 uint32_t raw = 0;
 float voltage = 0.0;
 
-#define ONE_WIRE_BUS 4                // Пин подключения OneWire шины, 0 (D2)
-OneWire oneWire(ONE_WIRE_BUS);        // Подключаем бибилотеку OneWire
-DallasTemperature sensors(&oneWire);  // Подключаем бибилотеку DallasTemperature
-DeviceAddress deviceAddress;
-uint8_t deviceCount = 0;
-float temp = 0.0f;
 String resetReason;
 bool wakeup = false;
 
+void setupBoard() {
+  
+  WiFi.persistent(false);
+  WiFi.disconnect();
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+
+  wifiSetMode(WIFI_AP_STA);
+  delay(1000);
+
+  //startAP(data.conf);
+
+  wifiShutdown();
+  
+  rlog_i("info", "Restart ESP");
+  ESP.restart();
+}
+
 void setup() {
 
-  #ifdef DEBUG_INFO
+#ifdef DEBUG_INFO
   Serial.begin(115200);
   delay(1000);
   Serial.println();
-  #endif
+#endif
   rlog_i("info", "Boot ok");
   
   resetReason = ESP.getResetReason();
-
   if (resetReason == "Deep-Sleep Wake") {
     wakeup = false;
   }
@@ -67,28 +79,6 @@ void setup() {
   pinMode(BOARD_LED, OUTPUT);
   digitalWrite(BOARD_LED, LOW);
   
-  // get temperature
-  #define METHOD1
-  sensors.begin();
-  deviceCount = sensors.getDeviceCount();
-  rlog_i("info", "Device count = %d", deviceCount);
-  if (deviceCount) {
-  #ifdef METHOD1  
-    if (sensors.getAddress(deviceAddress, 0)) {
-  #else  
-    oneWire.reset_search();
-    if (oneWire.search(deviceAddress)) {
-  #endif
-      rlog_i("info", "Device address = %d", deviceAddress);
-
-      sensors.setResolution(deviceAddress, 10);
-      sensors.requestTemperatures();
-      temp = sensors.getTempC(deviceAddress);
-      data.temp = temp;
-      rlog_i("info", "Temperature = %f °C", temp);
-    }
-  }
-
   uint16_t count = 0;
 #ifdef RTC_ENABLE
   bool rc = false;
@@ -99,14 +89,14 @@ void setup() {
   rc = rtc_write(&count);
   rlog_i("info", "RTC write count: %d wrc = %d",  count, rc);
 #endif  
-  data.count = count;
+  data.data.count = count;
 
 // get voltage
   pinMode(A0, OUTPUT);
   raw = analogRead(A0);
   voltage = raw / 1049.645;
-  voltage = voltage * 1.0;
-  data.voltage = voltage;
+  voltage = voltage * (51.0 + 3.3) / 3.3;
+  data.data.voltage = voltage;
 
 // try to connect
   attempt = 32;
@@ -117,7 +107,7 @@ void setup() {
   }
 
   if(WiFi.status() == WL_CONNECTED) {
-    data.version = VERSION;
+    getTempC(data.data);
     getJSONData(data, json_data);
     sendHTTP(URL, json_data);
   
@@ -129,6 +119,9 @@ void setup() {
 //  ESP.deepSleep(1.8e9);
 }
 
+bool flag = false;
+uint32_t btnTimer = 0;
+
 void loop() {
   if (!wakeup) {
     delay (1000);
@@ -139,4 +132,29 @@ void loop() {
   #ifndef OTA_DISABLE
   ArduinoOTA.handle();
   #endif
+
+  //button
+	bool btnState = digitalRead(BUTTON);
+  if (btnState && !flag && millis() - btnTimer > 100) {
+    flag = true;
+    btnTimer = millis();
+    rlog_i("info loop >>>>>", "PRESS");
+  }
+  
+  if (btnState && flag && millis() - btnTimer > BTN_HOLD_SETUP) {
+    btnTimer = millis();
+    rlog_i("info loop >>>>>", "PRESS HOLD");
+    setupBoard();
+  }
+  
+  if (!btnState && flag && millis() - btnTimer > BTN_CLICK) {
+    btnTimer = millis();
+    rlog_i("info loop >>>>>", "MAKE CLICK");
+  }
+  
+  if (!btnState && flag && millis() - btnTimer > 100) {
+    flag = false;
+    btnTimer = millis();
+    rlog_i("info loop >>>>>", "RELEASE");
+  }
 }
