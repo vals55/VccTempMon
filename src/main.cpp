@@ -140,7 +140,7 @@ void loop() {
   if (!wakeup) {
     delay (1000);
     rlog_i("info", "System is going to sleep...");
-    ESP.deepSleep (15e6);
+    ESP.deepSleep (18e9);
   }
   
   #ifndef OTA_DISABLE
@@ -174,7 +174,7 @@ void loop() {
   }
 
   // wait and escape timer
-  if (millis() - waitTimer >= 600 * PERIOD_SEC) {
+  if (millis() - waitTimer >= 60 * PERIOD_SEC) {
     waitTimer = millis();
     rlog_i("info loop >>>>>", "Game over. Restart.");
     ESP.restart();
