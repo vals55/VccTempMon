@@ -9,6 +9,7 @@
 #include "sensor.h"
 #include "wifi.h"
 
+#define BOARD_LED 2
 #define BUTTON 15
 #define BTN_HOLD_SETUP 5000
 #define BTN_CLICK 200
@@ -27,7 +28,6 @@
 #define WIFI_SSID "private-koptevo-wlan-bgn"
 #define WIFI_PASS "gfhfvjy2"
 #define URL "http://home.shokurov.ru/vcc"
-#define BOARD_LED 2
 
 extern "C" {
 #include "user_interface.h"
@@ -42,6 +42,12 @@ float voltage = 0.0;
 
 String resetReason;
 bool wakeup = false;
+
+void flashLED() {
+  digitalWrite(BOARD_LED, LOW);
+  delay(5);
+  digitalWrite(BOARD_LED, HIGH);
+}
 
 void setupBoard() {
   
@@ -90,7 +96,7 @@ void setup() {
   rlog_i("info", "Reset reason: >%s< wakeup = %d", resetReason.c_str(), wakeup);
 
   pinMode(BOARD_LED, OUTPUT);
-  digitalWrite(BOARD_LED, LOW);
+  flashLED();
   
   uint16_t count = 0;
 #ifdef RTC_ENABLE
@@ -135,6 +141,7 @@ void setup() {
 bool flag = false;
 uint32_t btnTimer = 0;
 uint32_t waitTimer = 0;
+uint32_t secTimer = 0;
 
 void loop() {
   if (!wakeup) {
@@ -177,6 +184,11 @@ void loop() {
   if (millis() - waitTimer >= 60 * PERIOD_SEC) {
     waitTimer = millis();
     rlog_i("info loop >>>>>", "Game over. Restart.");
+    flashLED();
     ESP.restart();
+  }
+  if (millis() - secTimer >= 1 * PERIOD_SEC) {
+    secTimer = millis();
+    flashLED();
   }
 }
