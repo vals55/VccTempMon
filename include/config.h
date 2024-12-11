@@ -51,7 +51,8 @@ struct BoardConfig {
     char ssid[SSID_LEN] = {0}; 
     char password[PASSW_LEN] = {0};
 
-    uint16_t mqtt_period = 10;
+    uint16_t sleep_period = 60;
+
     char     mqtt_host[MQTT_HOST_LEN] = {0};
     uint16_t mqtt_port;
     char     mqtt_login[MQTT_LOGIN_LEN] = {0};
@@ -60,7 +61,6 @@ struct BoardConfig {
     char     mqtt_discovery_topic[MQTT_TOPIC_LEN] = HA_DISCOVERY_TOPIC;
     uint8_t  mqtt_auto_discovery = MQTT_AUTO_DISCOVERY;
 
-    uint16_t stat_period = 60;
     char     stat_host[STAT_HOST_LEN] = {0};
 
     uint32_t ip;

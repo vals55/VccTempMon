@@ -126,7 +126,7 @@ void loop() {
   if (!wakeup) {
     delay (1000);
     rlog_i("info", "System is going to sleep...");
-    ESP.deepSleep (1.8e9);
+    ESP.deepSleep (15e6);
   }
   
   #ifndef OTA_DISABLE
@@ -149,6 +149,7 @@ void loop() {
   
   if (!btnState && flag && millis() - btnTimer > BTN_CLICK) {
     btnTimer = millis();
+    ESP.restart();
     rlog_i("info loop >>>>>", "MAKE CLICK");
   }
   
