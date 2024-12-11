@@ -29,6 +29,11 @@
 #define URL "http://home.shokurov.ru/vcc"
 #define BOARD_LED 2
 
+extern "C" {
+#include "user_interface.h"
+extern struct rst_info resetInfo;
+}
+
 Data data;
 DynamicJsonDocument json_data(JSON_BUFFER);
 uint8_t attempt = 0;
@@ -64,16 +69,24 @@ void setup() {
 #endif
   rlog_i("info", "Boot ok");
   
+  switch(resetInfo.reason) {
+    // normal startup by power on
+    case REASON_DEFAULT_RST:      wakeup = false; break;
+    // hardware watch dog reset
+    case REASON_WDT_RST:          wakeup = false; break;
+    // exception reset, GPIO status won’t change
+    case REASON_EXCEPTION_RST:    wakeup = false; break;
+    // software watch dog reset, GPIO status won’t change
+    case REASON_SOFT_WDT_RST:     wakeup = false; break;
+    // software restart ,system_restart , GPIO status won’t change
+    case REASON_SOFT_RESTART:     wakeup = false; break;
+    // wake up from deep-sleep
+    case REASON_DEEP_SLEEP_AWAKE: wakeup = false; break;
+    // external system reset
+    case REASON_EXT_SYS_RST:      wakeup = true; break;
+    default:                      wakeup = false; break;
+  }
   resetReason = ESP.getResetReason();
-  if (resetReason == "Deep-Sleep Wake") {
-    wakeup = false;
-  }
-  else if (resetReason == "Power On") {
-    wakeup = false;
-  }
-  else {
-    wakeup = true;
-  }
   rlog_i("info", "Reset reason: >%s< wakeup = %d", resetReason.c_str(), wakeup);
 
   pinMode(BOARD_LED, OUTPUT);
@@ -121,6 +134,7 @@ void setup() {
 
 bool flag = false;
 uint32_t btnTimer = 0;
+uint32_t waitTimer = 0;
 
 void loop() {
   if (!wakeup) {
@@ -157,5 +171,12 @@ void loop() {
     flag = false;
     btnTimer = millis();
     rlog_i("info loop >>>>>", "RELEASE");
+  }
+
+  // wait and escape timer
+  if (millis() - waitTimer >= 600 * PERIOD_SEC) {
+    waitTimer = millis();
+    rlog_i("info loop >>>>>", "Game over. Restart.");
+    ESP.restart();
   }
 }

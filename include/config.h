@@ -4,10 +4,10 @@
 
 #include <Arduino.h>
 
-#define VERSION 7
-#define FIRMWARE_VERSION "1.52"
-#define HARDWARE_VERSION "0.70"
-#define BRAND_NAME "eMeter"
+#define VERSION 1
+#define FIRMWARE_VERSION "0.10"
+#define HARDWARE_VERSION "0.10"
+#define BRAND_NAME "vccmon"
 #define CLASSIC 0
 #define LITE 1
 #define MODEL CLASSIC
