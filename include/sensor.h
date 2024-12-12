@@ -36,6 +36,11 @@ void getTempC(Measurements &data) {
       sensors.setResolution(deviceAddress, 10);
       sensors.requestTemperatures();
       data.temp = sensors.getTempC(deviceAddress);
+      if (data.temp == DEVICE_DISCONNECTED_C) {
+        delay(200);
+        sensors.requestTemperatures();
+        data.temp = sensors.getTempC(deviceAddress);
+      }
       rlog_i("info", "Temperature = %f °C", data.temp);
     }
   }

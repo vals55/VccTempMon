@@ -3,6 +3,9 @@
 #pragma once
 
 #include <Arduino.h>
+#include <IPAddress.h>
+#include "buffer.h"
+#include <rLog.h>
 
 #define VERSION 1
 #define FIRMWARE_VERSION "0.10"
@@ -14,7 +17,7 @@
 
 #define SSID_LEN 32
 #define PASSW_LEN 64
-#define MQTT_HOST_LEN 44    //64 хватило бы и 15 для ip адреса, делаем элемент буфера не более 512 вместе с crc
+#define MQTT_HOST_LEN 16  
 #define MQTT_LOGIN_LEN 32
 #define MQTT_PASSWORD_LEN 32
 #define MQTT_TOPIC_LEN 64
@@ -73,4 +76,11 @@ struct BoardConfig {
     uint8_t wifi_bssid[6] = {0};
     uint8_t wifi_channel = 0;
     uint8_t wifi_phy_mode = 3;
-};
+}; // 471
+
+inline void strncpy0(char *dest, const char *src, const size_t len) {
+    strncpy(dest, src, len - 1);
+    dest[len - 1] = 0;
+}
+
+bool loadConfig(BoardConfig &conf);

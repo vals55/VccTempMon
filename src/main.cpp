@@ -8,6 +8,8 @@
 #include "http.h"
 #include "sensor.h"
 #include "wifi.h"
+#include "config.h"
+#include "buffer.h"
 
 #define BOARD_LED 2
 #define BUTTON 15
@@ -43,6 +45,8 @@ float voltage = 0.0;
 String resetReason;
 bool wakeup = false;
 
+EEPROMBuff<BoardConfig> storage(8);
+
 void flashLED() {
   digitalWrite(BOARD_LED, LOW);
   delay(5);
@@ -74,6 +78,13 @@ void setup() {
   Serial.println();
 #endif
   rlog_i("info", "Boot ok");
+
+  bool success = loadConfig(data.conf);
+  rlog_i("info", "loadConfig = %d", success);
+  if (!success) {
+    rlog_i("info", "Setup board entering");
+    // setupBoard();
+  }
   
   switch(resetInfo.reason) {
     // normal startup by power on
@@ -123,9 +134,11 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED && attempt--) {
     rlog_i("info", "Wait while WiFi attempt = %d...", 32 - attempt);
     delay(500);
+    flashLED();
   }
 
   if(WiFi.status() == WL_CONNECTED) {
+    digitalWrite(BOARD_LED, LOW);
     getTempC(data.data);
     getJSONData(data, json_data);
     sendHTTP(URL, json_data);
@@ -134,6 +147,7 @@ void setup() {
     ArduinoOTA.begin();
   #endif
   }
+  digitalWrite(BOARD_LED, HIGH);
 
 //  ESP.deepSleep(1.8e9);
 }
@@ -147,7 +161,7 @@ void loop() {
   if (!wakeup) {
     delay (1000);
     rlog_i("info", "System is going to sleep...");
-    ESP.deepSleep (18e9);
+    ESP.deepSleep (600e6);  // in sec
   }
   
   #ifndef OTA_DISABLE
