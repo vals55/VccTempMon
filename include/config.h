@@ -84,3 +84,5 @@ inline void strncpy0(char *dest, const char *src, const size_t len) {
 }
 
 bool loadConfig(BoardConfig &conf);
+bool testConfig(BoardConfig &conf);
+void storeConfig(const BoardConfig &conf);

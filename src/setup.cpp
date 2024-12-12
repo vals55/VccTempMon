@@ -10,20 +10,6 @@ WiFiManager wm;
 
 #define SETUP_TIME_SEC 300
 
-// #define CALLBACK_NEED
-#ifdef CALLBACK_NEED
-void handleRoute(){
-  rlog_i("info", "[HTTP] /custom handle route");
-  wm.server->send(200, "text/plain", "hello from user code");
-}
-
-void bindServerCallback(){
-  wm.server->on("/custom", handleRoute); // this is now crashing esp32 for some reason
-  // wm.server->on("/info",handleRoute); // you can override wm!
-}
-
-#endif
-
 void wifiInfo() {
   // can contain gargbage on esp32 if wifi is not ready yet
   rlog_i("info", "[wifiInfo] WIFI INFO DEBUG");
@@ -66,22 +52,11 @@ void startAP(BoardConfig &conf) {
       wifi_station_set_config(&sconf);
   }
 
-  WiFiManagerParameter subtitle_energy("<h3>Электроэнергия</h3>");
-  wm.addParameter(&subtitle_energy);
-
-  FloatParameter param_counter_t1("counter_t1", "Показания счетчика T1, кВт*ч:", conf.counter_t1);
-  wm.addParameter(&param_counter_t1);
-  FloatParameter param_counter_t2("counter_t2", "Показания счетчика T2, кВт*ч:", conf.counter_t2);
-  wm.addParameter(&param_counter_t2);
-
-  LongParameter param_coeff("coeff", "Коэффициент счетчика, имп./кВт*ч:", conf.coeff);
-  wm.addParameter(&param_coeff);
+  LongParameter param_sleep_period("sleep_period", "Период отправки показаний, мин.:", conf.sleep_period);
+  wm.addParameter(&param_sleep_period);
 
   WiFiManagerParameter subtitle_mqtt("<h3>MQTT</h3>");
   wm.addParameter(&subtitle_mqtt);
-
-  LongParameter param_mqtt_period("mqtt_period", "Период отправки показаний, мин.:", conf.mqtt_period);
-  wm.addParameter(&param_mqtt_period);
 
   WiFiManagerParameter param_mqtt_host("mqtt_host", "Адрес брокера:", conf.mqtt_host, MQTT_HOST_LEN-1);
   wm.addParameter(&param_mqtt_host);
@@ -110,9 +85,6 @@ void startAP(BoardConfig &conf) {
 
   WiFiManagerParameter subtitle_stat("<h3>Статистика</h3>");
   wm.addParameter(&subtitle_stat);
-
-  LongParameter param_stat_period("stat_period", "Период отправки статистики, сек.:", conf.stat_period);
-  wm.addParameter(&param_stat_period);
 
   WiFiManagerParameter param_stat_host("stat_host", "URL сбора статистики:", conf.stat_host, STAT_HOST_LEN-1);
   wm.addParameter(&param_stat_host);
@@ -178,11 +150,8 @@ void startAP(BoardConfig &conf) {
     
   strncpy0(conf.ssid, wm.getWiFiSSID().c_str(), SSID_LEN);
   strncpy0(conf.password, wm.getWiFiPass().c_str(), PASSW_LEN);
-  conf.counter_t1 = param_counter_t1.getValue();
-  conf.counter_t2 = param_counter_t2.getValue();
-  conf.coeff = param_coeff.getValue();
 
-  conf.mqtt_period = param_mqtt_period.getValue();
+  conf.sleep_period = param_sleep_period.getValue();
   strncpy0(conf.mqtt_host, param_mqtt_host.getValue(), MQTT_HOST_LEN);
   conf.mqtt_port = param_mqtt_port.getValue();
   strncpy0(conf.mqtt_login, param_mqtt_login.getValue(), MQTT_LOGIN_LEN);
@@ -191,7 +160,6 @@ void startAP(BoardConfig &conf) {
   strncpy0(conf.mqtt_discovery_topic, param_mqtt_discovery_topic.getValue(), MQTT_TOPIC_LEN);
   conf.mqtt_auto_discovery = param_mqtt_auto_discovery.getValue();
 
-  conf.stat_period = param_stat_period.getValue();
   strncpy0(conf.stat_host, param_stat_host.getValue(), STAT_HOST_LEN);
 
   conf.ip = param_ip.getValue();

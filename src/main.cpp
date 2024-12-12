@@ -59,6 +59,7 @@ void flashLED() {
 
 void setupBoard() {
   
+  digitalWrite(BOARD_LED, LOW);
   WiFi.persistent(false);
   WiFi.disconnect();
   WiFi.setSleepMode(WIFI_NONE_SLEEP);

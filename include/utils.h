@@ -24,3 +24,12 @@ uint16_t getCRC(const BoardConfig &conf) {
 	}
 	return crc;
 }
+
+String getDeviceName() {
+	String deviceName = String(BRAND_NAME) + "-" + ESP.getChipId();
+	return deviceName;
+}
+
+String getAppName() {
+	return getDeviceName() + "-" + String(FIRMWARE_VERSION);
+}
