@@ -11,6 +11,10 @@
 #include "config.h"
 #include "buffer.h"
 
+#ifndef ESP8266
+  #define ESP8266
+#endif
+
 #define BOARD_LED 2
 #define BUTTON 15
 #define BTN_HOLD_SETUP 5000
