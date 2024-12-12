@@ -1,6 +1,5 @@
 // Copyright 2023 vals. All rights reserved.
 // SPDX-License-Identifier: MIT
-#pragma once
 
 #include <Arduino.h>
 #include "utils.h"
