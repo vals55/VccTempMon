@@ -33,7 +33,7 @@ void getTempC(Measurements &data) {
 #endif
       rlog_i("info", "Device address = %d", deviceAddress);
 
-      sensors.setResolution(deviceAddress, 10);
+      sensors.setResolution(deviceAddress, 9);
       sensors.requestTemperatures();
       data.temp = sensors.getTempC(deviceAddress);
       if (data.temp == DEVICE_DISCONNECTED_C) {
