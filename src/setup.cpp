@@ -142,7 +142,8 @@ void startAP(BoardConfig &conf) {
   // wm.setHttpPort(8080);
 
   //bool result = wm.startConfigPortal(getAppName().c_str());
-  if (!wm.autoConnect(getAppName().c_str())) {
+  // if (!wm.autoConnect(getAppName().c_str())) {
+  if (!wm.startConfigPortal(getAppName().c_str())) {
     rlog_i("info", "[WiFi AP server] failed to connect and hit timeout");
     delay(3000);
     //reset and try again, or maybe put it to deep sleep

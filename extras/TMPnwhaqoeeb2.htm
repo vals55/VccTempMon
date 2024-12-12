@@ -58,20 +58,20 @@
     <br/>
     <hr>
     <br/>
-    <label for='sleep_period'>Период отправки показаний, мин.:</label>
+    <label for='sleep_period'>��еѢиод отпѢавки показаний, мин.:</label>
     <br/>
     <input id='sleep_period' name='sleep_period' maxlength='10' value='60'  type="number">
     <h3>MQTT</h3>
-    <label for='mqtt_host'>Адрес брокера:</label>
+    <label for='mqtt_host'>��дѢеѣ бѢокеѢа:</label>
     <br/>
     <input id='mqtt_host' name='mqtt_host' maxlength='15' value='192.169.254.60' >
-    <label for='mqtt_port'>Порт:</label>
+    <label for='mqtt_port'>��оѢт:</label>
     <br/>
     <input id='mqtt_port' name='mqtt_port' maxlength='10' value='1883'  type="number">
     <label for='mqtt_login'>Логин:</label>
     <br/>
     <input id='mqtt_login' name='mqtt_login' maxlength='31' value='mqtt' >
-    <label for='mqtt_password'>Пароль:</label>
+    <label for='mqtt_password'>��аѢолѪ:</label>
     <br/>
     <input id='mqtt_password' name='mqtt_password' maxlength='31' value='mqtt' >
     <label for='mqtt_topic'>Топик данных:</label>
@@ -80,36 +80,36 @@
     <label for='mqtt_discovery_topic'>Топик Home Assistant:</label>
     <br/>
     <input id='mqtt_discovery_topic' name='mqtt_discovery_topic' maxlength='63' value='homeassistant' >
-    <label class='chk-box'>Автоматическое добавление в Home Assistant<br/>
+    <label class='chk-box'>��втоматичеѣкое добавление в Home Assistant<br/>
     <input id='mqtt_auto_discovery' name='mqtt_auto_discovery' maxlength='2' value='T'  type="checkbox" checked>
     <span class='box'></span></label>
-    <h3>Статистика</h3>
-    <label for='stat_host'>URL сбора статистики:</label>
+    <h3>Статиѣтика</h3>
+    <label for='stat_host'>URL ѣбоѢа ѣтатиѣтики:</label>
     <br/>
     <input id='stat_host' name='stat_host' maxlength='63' value='http://home.shokurov.ru/vcc' >
-    <label class='chk-box'>Расширенные настройки
+    <label class='chk-box'>РаѣшиѢенные наѣтѢойки
     <input type='checkbox' id='chbox' name='chbox' onclick='extraConf()'>
     <span class='box'></span></label>
     <div id='extra_conf' style='display:none'>
-      <h3>Сетевые настройки</h3>
-      <label>MAC адрес: D8:BF:C0:FC:AC:94</label>
+      <h3>Сетевые наѣтѢойки</h3>
+      <label>MAC адѢеѣ: D8:BF:C0:FC:AC:94</label>
       <br />
       <br />
-      <label for='ip'>Статический IP (оставьте 0.0.0.0 для DHCP):</label>
+      <label for='ip'>Статичеѣкий IP (оѣтавѪте 0.0.0.0 длѯ DHCP):</label>
       <br/><input id='ip' name='ip' maxlength='16' value='0.0.0.0' minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"> 
-      <label for='gateway'>Шлюз:</label>
+      <label for='gateway'>Шлѫз:</label>
       <br/><input id='gateway' name='gateway' maxlength='16' value='192.168.0.1' minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"> 
-      <label for='mask'>Маска подсети:</label>
+      <label for='mask'>��аѣка подѣети:</label>
       <br/><input id='mask' name='mask' maxlength='16' value='255.255.255.0' minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$"> 
-      <label>Режим работы WiFi:</label>
+      <label>Режим Ѣаботы WiFi:</label>
       <label for='wifi_phy_mode'></label>
       <select class='drop' id='wifi_phy_mode' name='wifi_phy_mode'>
         <option selected value='3'>11n</option>
       </select>
-      <label for='ntp_server'>Сервер времени (NTP):</label>
+      <label for='ntp_server'>СеѢвеѢ вѢемени (NTP):</label>
       <br/>
       <input id='ntp_server' name='ntp_server' maxlength='63' value='ru.pool.ntp.org' >
-      <label for='tz'>Часовой пояс (разница с UTC):</label>
+      <label for='tz'>Чаѣовой поѯѣ (Ѣазница ѣ UTC):</label>
       <br/>
       <input id='tz' name='tz' maxlength='10' value='3'  type="number">
     </div>

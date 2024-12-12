@@ -140,11 +140,15 @@ void setup() {
 
 // try to connect
   attempt = 32;
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  WiFi.begin(data.conf.ssid, data.conf.password);
   while (WiFi.status() != WL_CONNECTED && attempt--) {
     rlog_i("info", "Wait while WiFi attempt = %d...", 32 - attempt);
     delay(500);
     flashLED();
+  }
+  
+  if(!attempt) {
+    setupBoard();
   }
 
   if(WiFi.status() == WL_CONNECTED) {
