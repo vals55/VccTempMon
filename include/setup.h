@@ -6,6 +6,10 @@
 #include <WiFiManager.h>
 #include "config.h"
 
+#ifndef ESP8266
+#define ESP8266
+#endif
+
 void startAP(BoardConfig &conf);
 
 class LongParameter : public WiFiManagerParameter {
