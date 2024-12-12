@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <rlog.h>
+#include <WiFiManager.h>
 #include "data.h"
 #include "http.h"
 #include "sensor.h"
