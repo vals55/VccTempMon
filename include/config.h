@@ -23,6 +23,7 @@
 #define MQTT_TOPIC_LEN 64
 
 #define STAT_HOST_LEN 64
+#define STAT_HOST_URL "http://home.shokurov.ru/vcc"
 
 #ifndef DISCOVERY_TOPIC
 #define HA_DISCOVERY_TOPIC "homeassistant"

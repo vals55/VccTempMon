@@ -11,6 +11,7 @@
 #include "wifi.h"
 #include "config.h"
 #include "buffer.h"
+#include "setup.h"
 
 #ifndef ESP8266
   #define ESP8266
@@ -61,6 +62,8 @@ void flashLED() {
 void setupBoard() {
   
   digitalWrite(BOARD_LED, LOW);
+  delay(10000);
+
   WiFi.persistent(false);
   WiFi.disconnect();
   WiFi.setSleepMode(WIFI_NONE_SLEEP);
@@ -68,7 +71,7 @@ void setupBoard() {
   wifiSetMode(WIFI_AP_STA);
   delay(1000);
 
-  //startAP(data.conf);
+  startAP(data.conf);
 
   wifiShutdown();
   
@@ -83,13 +86,15 @@ void setup() {
   delay(1000);
   Serial.println();
 #endif
+  pinMode(BOARD_LED, OUTPUT);
+
   rlog_i("info", "Boot ok");
 
   bool success = loadConfig(data.conf);
   rlog_i("info", "loadConfig = %d", success);
   if (!success) {
     rlog_i("info", "Setup board entering");
-    // setupBoard();
+    setupBoard();
   }
   
   switch(resetInfo.reason) {
@@ -112,7 +117,6 @@ void setup() {
   resetReason = ESP.getResetReason();
   rlog_i("info", "Reset reason: >%s< wakeup = %d", resetReason.c_str(), wakeup);
 
-  pinMode(BOARD_LED, OUTPUT);
   flashLED();
   
   uint16_t count = 0;

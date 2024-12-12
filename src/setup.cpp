@@ -7,13 +7,18 @@
 #include "utils.h"
 
 WiFiManager wm;
+bool shouldSaveConfig = false;
 
 #define SETUP_TIME_SEC 300
+
+void saveConfigCallback () {
+  rlog_i("info", "[WiFi AP server] Should save config");
+  shouldSaveConfig = true;
+}
 
 void wifiInfo() {
   // can contain gargbage on esp32 if wifi is not ready yet
   rlog_i("info", "[wifiInfo] WIFI INFO DEBUG");
-  // WiFi.printDiag(Serial);
   rlog_i("info", "[wifiInfo] SAVED: %s", (String)(wm.getWiFiIsSaved() ? "YES" : "NO"));
   rlog_i("info", "[wifiInfo] SSID: %s", (String)wm.getWiFiSSID());
   rlog_i("info", "[wifiInfo] PASS: %s", (String)wm.getWiFiPass());
@@ -21,8 +26,6 @@ void wifiInfo() {
 }
 
 void startAP(BoardConfig &conf) {
-
-    wm.WiFiManagerInit();
 
 #ifdef WIFI_DEBUG_INFO
   rlog_i("info", "WiFi debug info enabled");
@@ -34,12 +37,6 @@ void startAP(BoardConfig &conf) {
   // wm.erase();
 #endif
 
-#ifdef CALLBACK_NEED
-  wm.setWebServerCallback(bindServerCallback);
-#endif  
-  std::vector<const char *> menu = {};
-  wm.setMenu(menu);
-  
   if (conf.ssid[0]) {
       struct station_config sconf;
       sconf.bssid_set = 0;
@@ -130,6 +127,8 @@ void startAP(BoardConfig &conf) {
   WiFiManagerParameter div_end("</div>");
   wm.addParameter(&div_end);
 
+  wm.setSaveConfigCallback(saveConfigCallback);
+
   // set custom channel
   // wm.setWiFiAPChannel(13);
   
@@ -142,8 +141,15 @@ void startAP(BoardConfig &conf) {
   // set custom webserver port, automatic captive portal does not work with custom ports!
   // wm.setHttpPort(8080);
 
-  bool result = wm.startConfigPortal(getAppName().c_str());
-  
+  //bool result = wm.startConfigPortal(getAppName().c_str());
+  if (!wm.autoConnect(getAppName().c_str())) {
+    rlog_i("info", "[WiFi AP server] failed to connect and hit timeout");
+    delay(3000);
+    //reset and try again, or maybe put it to deep sleep
+    // ESP.restart();
+    // delay(5000);
+  }
+
 #ifdef WIFI_DEBUG_INFO
    wifiInfo();
 #endif  
@@ -171,6 +177,8 @@ void startAP(BoardConfig &conf) {
   strncpy0(conf.ntp_server, param_ntp_server.getValue(), NTP_HOST_LEN);
   conf.tz = param_tz.getValue();
 
-  storeConfig(conf);
-  rlog_i("info", "Config stored!");
+  if (shouldSaveConfig) {
+    storeConfig(conf);
+    rlog_i("info", "Config stored!");
+  }
 }

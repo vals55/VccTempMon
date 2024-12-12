@@ -47,6 +47,9 @@ bool loadConfig(BoardConfig &conf) {
         String discovery_topic(HA_DISCOVERY_TOPIC);
         strncpy0(conf.mqtt_discovery_topic, discovery_topic.c_str(), discovery_topic.length() + 1);
 
+        String stat_host_url(STAT_HOST_URL);
+        strncpy0(conf.stat_host, stat_host_url.c_str(), stat_host_url.length() + 1);
+
         strncpy0(conf.ntp_server, DEFAULT_NTP_SERVER, sizeof(DEFAULT_NTP_SERVER) + 1);
         conf.tz = DEFAULT_TZ;
         
