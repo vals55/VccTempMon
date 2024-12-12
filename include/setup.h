@@ -67,6 +67,7 @@ public:
         options.reserve(200);
     }
     void add_option(const int value, const char *title, const int default_value) {
+        options = getCustomHTML();
         options += "<option ";
         if (value == default_value) {
             options += "selected ";
