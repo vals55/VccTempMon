@@ -4,6 +4,12 @@
 #include <Arduino.h>
 #include "utils.h"
 
+void flashLED() {
+  digitalWrite(BOARD_LED, LOW);
+  delay(5);
+  digitalWrite(BOARD_LED, HIGH);
+}
+
 uint16_t getCRC(const BoardConfig &conf) {
 	uint8_t *buf = (uint8_t *)&conf;
 	uint16_t crc = 0xffff, poly = 0xa001;
@@ -31,4 +37,36 @@ String getDeviceName() {
 
 String getAppName() {
 	return getDeviceName() + "-" + String(FIRMWARE_VERSION);
+}
+
+bool isMQTT(const BoardConfig &conf) {
+#ifndef MQTT_DISABLED
+	return conf.mqtt_host[0];
+#else
+	return false;
+#endif
+}
+
+bool isStat(const BoardConfig &conf) {
+#ifndef STAT_DISABLED
+	return conf.stat_host[0];
+#else
+	return false;
+#endif
+}
+
+bool isNTP(const BoardConfig &conf) {
+	return conf.ntp_server[0];
+}
+
+bool isHA(const BoardConfig &conf) {
+#ifndef MQTT_DISABLED
+	return isMQTT(conf) && conf.mqtt_auto_discovery;
+#else
+	return false;
+#endif
+}
+
+bool isDHCP(const BoardConfig &conf) {
+	return conf.ip != 0;
 }

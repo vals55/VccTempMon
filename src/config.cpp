@@ -39,6 +39,9 @@ bool loadConfig(BoardConfig &conf) {
         rlog_i("info", "EEPROM NEW config");
 
         conf.version = VERSION;
+        
+        conf.sleep_period = DEFAULT_SLEEP_PERIOD;
+
         String default_topic = String(MQTT_DEFAULT_TOPIC_PREFIX) + "/" + String(ESP.getChipId()) + "/";
         strncpy0(conf.mqtt_topic, default_topic.c_str(), default_topic.length() + 1);
         conf.mqtt_port = MQTT_DEFAULT_PORT;

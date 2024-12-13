@@ -8,9 +8,9 @@
 #include <rLog.h>
 
 #define VERSION 1
-#define FIRMWARE_VERSION "0.10"
+#define FIRMWARE_VERSION "0.20"
 #define HARDWARE_VERSION "0.10"
-#define BRAND_NAME "vccmon"
+#define BRAND_NAME "VccMon"
 #define CLASSIC 0
 #define LITE 1
 #define MODEL CLASSIC
@@ -28,6 +28,8 @@
 #ifndef DISCOVERY_TOPIC
 #define HA_DISCOVERY_TOPIC "homeassistant"
 #endif
+
+#define DEFAULT_SLEEP_PERIOD 60
 
 #ifndef MQTT_AUTO_DISCOVERY
 #define MQTT_AUTO_DISCOVERY true

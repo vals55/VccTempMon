@@ -12,12 +12,12 @@
 #include "config.h"
 #include "buffer.h"
 #include "setup.h"
+#include "utils.h"
 
 #ifndef ESP8266
   #define ESP8266
 #endif
 
-#define BOARD_LED 2
 #define BUTTON 15
 #define BTN_HOLD_SETUP 5000
 #define BTN_CLICK 200
@@ -47,17 +47,12 @@ DynamicJsonDocument json_data(JSON_BUFFER);
 uint8_t attempt = 0;
 uint32_t raw = 0;
 float voltage = 0.0;
+uint64_t sleep_period = DEFAULT_SLEEP_PERIOD * 60e6;
 
 String resetReason;
 bool wakeup = false;
 
 EEPROMBuff<BoardConfig> storage(8);
-
-void flashLED() {
-  digitalWrite(BOARD_LED, LOW);
-  delay(5);
-  digitalWrite(BOARD_LED, HIGH);
-}
 
 void setupBoard() {
   
@@ -92,7 +87,32 @@ void setup() {
 
   bool success = loadConfig(data.conf);
   rlog_i("info", "loadConfig = %d", success);
-  if (!success) {
+  
+  // rlog_i("info", "version = %d", data.conf.version);
+  // rlog_i("info", "ssid = %s", data.conf.ssid); 
+  // rlog_i("info", "password = %s", data.conf.password);
+  // rlog_i("info", "sleep_period = %d", data.conf.sleep_period);
+  // rlog_i("info", "mqtt_host = %s", data.conf.mqtt_host);
+  // rlog_i("info", "mqtt_port = %d", data.conf.mqtt_port);
+  // rlog_i("info", "mqtt_login = %s", data.conf.mqtt_login);
+  // rlog_i("info", "mqtt_password = %s", data.conf.mqtt_password);
+  // rlog_i("info", "mqtt_topic = %s", data.conf.mqtt_topic);
+  // rlog_i("info", "mqtt_discovery_topic = %s", data.conf.mqtt_discovery_topic);
+  // rlog_i("info", "mqtt_auto_discovery = %d", data.conf.mqtt_auto_discovery);
+  // rlog_i("info", "stat_host = %s", data.conf.stat_host);
+  // rlog_i("info", "ip = %d", data.conf.ip);
+  // rlog_i("info", "gateway = %d", data.conf.gateway);
+  // rlog_i("info", "mask = %d", data.conf.mask);
+  // rlog_i("info", "ntp_server = %s", data.conf.ntp_server);
+  // rlog_i("info", "tz = %d", data.conf.tz);
+  // rlog_i("info", "wifi_bssid = %d", data.conf.wifi_bssid);
+  // rlog_i("info", "wifi_channel = %d", data.conf.wifi_channel);
+  // rlog_i("info", "wifi_phy_mode = %d", data.conf.wifi_phy_mode);
+
+  sleep_period = data.conf.sleep_period * 60e6;
+  rlog_i("info", "period = %lld", sleep_period);
+
+  if (!success || !data.conf.sleep_period) {
     rlog_i("info", "Setup board entering");
     setupBoard();
   }
@@ -139,15 +159,11 @@ void setup() {
   data.data.voltage = voltage;
 
 // try to connect
-  attempt = 32;
-  WiFi.begin(data.conf.ssid, data.conf.password);
-  while (WiFi.status() != WL_CONNECTED && attempt--) {
-    rlog_i("info", "Wait while WiFi attempt = %d...", 32 - attempt);
-    delay(500);
-    flashLED();
-  }
-  
-  if(!attempt) {
+  success = wifiConnect(data.conf);
+  rlog_i("info", "WiFi connect = %d", success);
+
+  if (!success) {
+    rlog_i("info", "Setup board entering");
     setupBoard();
   }
 
@@ -155,15 +171,15 @@ void setup() {
     digitalWrite(BOARD_LED, LOW);
     getTempC(data.data);
     getJSONData(data, json_data);
-    sendHTTP(URL, json_data);
+    if(isStat(data.conf)) {
+      sendHTTP(URL, json_data);
+    }
   
   #ifndef OTA_DISABLE
     ArduinoOTA.begin();
   #endif
   }
   digitalWrite(BOARD_LED, HIGH);
-
-//  ESP.deepSleep(1.8e9);
 }
 
 bool flag = false;
@@ -175,7 +191,7 @@ void loop() {
   if (!wakeup) {
     delay (1000);
     rlog_i("info", "System is going to sleep...");
-    ESP.deepSleep (600e6);  // in sec
+    ESP.deepSleep (sleep_period);
   }
   
   #ifndef OTA_DISABLE

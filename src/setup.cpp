@@ -159,6 +159,7 @@ void startAP(BoardConfig &conf) {
   strncpy0(conf.password, wm.getWiFiPass().c_str(), PASSW_LEN);
 
   conf.sleep_period = param_sleep_period.getValue();
+ 
   strncpy0(conf.mqtt_host, param_mqtt_host.getValue(), MQTT_HOST_LEN);
   conf.mqtt_port = param_mqtt_port.getValue();
   strncpy0(conf.mqtt_login, param_mqtt_login.getValue(), MQTT_LOGIN_LEN);

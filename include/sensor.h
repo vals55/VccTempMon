@@ -36,7 +36,7 @@ void getTempC(Measurements &data) {
       sensors.setResolution(deviceAddress, 9);
       sensors.requestTemperatures();
       data.temp = sensors.getTempC(deviceAddress);
-      if (data.temp == DEVICE_DISCONNECTED_C) {
+      if (data.temp == 85) {
         delay(200);
         sensors.requestTemperatures();
         data.temp = sensors.getTempC(deviceAddress);
