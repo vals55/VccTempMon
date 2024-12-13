@@ -1,4 +1,4 @@
-// Copyright 2023 vals. All rights reserved.
+// Copyright 2024 vals. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 #include <Arduino.h>
@@ -165,6 +165,11 @@ void setup() {
   if (!success) {
     rlog_i("info", "Setup board entering");
     setupBoard();
+  }
+
+  if(success && isNTP(data.conf)) {
+    success = syncTime(data.conf);
+    rlog_i("info", "sync_ntp_time = %d", success);
   }
 
   if(WiFi.status() == WL_CONNECTED) {

@@ -1,4 +1,4 @@
-// Copyright 2023 vals. All rights reserved.
+// Copyright 2024 vals. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 #include <Arduino.h>
