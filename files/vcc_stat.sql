@@ -31,11 +31,12 @@ DROP TABLE IF EXISTS `vcc_stat`;
 CREATE TABLE `vcc_stat` (
   `id` int(11) NOT NULL,
   `voltage` float DEFAULT NULL,
-  `temp` float DEFAULT NULL,
+  `temperature` float DEFAULT NULL,
   `rssi` int(11) DEFAULT NULL,
   `mac` varchar(20) DEFAULT NULL,
   `ip` varchar(20) DEFAULT NULL,
   `count` int(11) DEFAULT NULL,
+  `send_period` int(11) DEFAULT NULL,
   `ver` varchar(20) DEFAULT NULL,
   `chip_id` int(11) DEFAULT NULL,
   `freemem` int(11) DEFAULT NULL,

@@ -88,12 +88,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
   mPayload.reserve(length);
 
-  rlog_i("info", "MQTT CALLBACK: Message arrived to: %s (len=%d)", mTopic.c_str(), length);
   for (unsigned int i = 0; i < length; i++) {
     mPayload += (char)payload[i];
   }
   updated = updateConfig(mTopic, mPayload);
-  rlog_i("info", "MQTT CALLBACK: Message payload: %s", mPayload.c_str());
   mPayload.clear();
   if(updated) {
     storeConfig(data.conf);
@@ -112,15 +110,11 @@ bool reconnect() {
   const char *login = data.conf.mqtt_login[0] ? data.conf.mqtt_login : NULL;
   const char *pass = data.conf.mqtt_password[0] ? data.conf.mqtt_password : NULL;
 
-  rlog_i("info", "MQTT Connecting...");
   while (!mqttClient.connected() && attempts--) {
-    rlog_i("info", "MQTT Attempt #%d from %d", MQTT_MAX_TRIES - attempts, MQTT_MAX_TRIES);
     if (mqttClient.connect(client_id.c_str(), login, pass)) {
       mqttClient.subscribe(subscribe_topic.c_str(), MQTT_QOS);
-      rlog_i("info", "MQTT subscribed to: %s", subscribe_topic.c_str());
       return true;
     } else {
-      rlog_i("info", "MQTT client connect failed with state %d", mqttClient.state());
       delay(MQTT_CONNECT_DELAY);
     }
   }
@@ -164,7 +158,7 @@ void setup() {
   // rlog_i("info", "version = %d", data.conf.version);
   // rlog_i("info", "ssid = %s", data.conf.ssid); 
   // rlog_i("info", "password = %s", data.conf.password);
-  // rlog_i("info", "sleep_period = %d", data.conf.sleep_period);
+  rlog_i("info", "sleep_period = %d", data.conf.sleep_period);
   // rlog_i("info", "mqtt_host = %s", data.conf.mqtt_host);
   // rlog_i("info", "mqtt_port = %d", data.conf.mqtt_port);
   // rlog_i("info", "mqtt_login = %s", data.conf.mqtt_login);
@@ -207,6 +201,7 @@ void setup() {
     case REASON_EXT_SYS_RST:      wakeup = true; break;
     default:                      wakeup = false; break;
   }
+  
   resetReason = ESP.getResetReason();
   rlog_i("info", "Reset reason: >%s< wakeup = %d", resetReason.c_str(), wakeup);
 
@@ -286,12 +281,13 @@ uint32_t waitTimer = 0;
 uint32_t secTimer = 0;
 
 void loop() {
+  
   if (!wakeup) {
     delay (1000);
     rlog_i("info", "System is going to sleep...");
     ESP.deepSleep (sleep_period);
   }
-  
+
   #ifndef OTA_DISABLE
   ArduinoOTA.handle();
   #endif
@@ -329,6 +325,7 @@ void loop() {
     flashLED();
     ESP.restart();
   }
+  
   if (millis() - secTimer >= 1 * PERIOD_SEC) {
     secTimer = millis();
     flashLED();

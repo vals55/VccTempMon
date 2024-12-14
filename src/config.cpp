@@ -9,7 +9,6 @@
 extern EEPROMBuff<BoardConfig> storage;
 
 bool testConfig(BoardConfig &conf) {
-    rlog_i("info", "Test Config...");
     
     BoardConfig test;
     return storage.get(test);
@@ -21,11 +20,8 @@ void storeConfig(const BoardConfig &conf) {
 }
 
 bool loadConfig(BoardConfig &conf) {
-    rlog_i("info", "Loading Config...");
     
     if (storage.get(conf)) {
-
-        rlog_i("info", "EEPROM restore config");
         conf.mqtt_host[MQTT_HOST_LEN - 1] = 0;
         conf.mqtt_login[MQTT_LOGIN_LEN - 1] = 0;
         conf.mqtt_password[MQTT_PASSWORD_LEN - 1] = 0;
@@ -36,8 +32,6 @@ bool loadConfig(BoardConfig &conf) {
         return true;
     } else {
         // Конфигурация не была сохранена в EEPROM, инициализируем с нуля
-        rlog_i("info", "EEPROM NEW config");
-
         conf.version = VERSION;
         
         conf.sleep_period = DEFAULT_SLEEP_PERIOD;

@@ -12,7 +12,6 @@ bool shouldSaveConfig = false;
 #define SETUP_TIME_SEC 300
 
 void saveConfigCallback () {
-  rlog_i("info", "[WiFi AP server] Should save config");
   shouldSaveConfig = true;
 }
 
@@ -144,7 +143,6 @@ void startAP(BoardConfig &conf) {
   //bool result = wm.startConfigPortal(getAppName().c_str());
   // if (!wm.autoConnect(getAppName().c_str())) {
   if (!wm.startConfigPortal(getAppName().c_str())) {
-    rlog_i("info", "[WiFi AP server] failed to connect and hit timeout");
     delay(3000);
     //reset and try again, or maybe put it to deep sleep
     // ESP.restart();
@@ -181,6 +179,5 @@ void startAP(BoardConfig &conf) {
 
   if (shouldSaveConfig) {
     storeConfig(conf);
-    rlog_i("info", "Config stored!");
   }
 }

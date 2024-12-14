@@ -22,7 +22,6 @@ void wifiSetMode(WiFiMode_t wifi_mode) {
 
   uint32_t attempts = WIFI_SET_MODE_ATTEMPTS;
   while (!WiFi.mode(wifi_mode) && attempts--) {
-    rlog_i("info", "WIFI: Retry set Mode...");
     delay(100);
   }
 
@@ -43,12 +42,9 @@ void wifiBegin(BoardConfig &conf) {
   WiFi.setSleepMode(WIFI_NONE_SLEEP); // disable sleep, can improve ap stability
   delay(200);
   wifiSetMode(WIFI_STA);
-  rlog_i("info", "Set mode STA");
  
   if (conf.wifi_phy_mode) {
-    if (!WiFi.setPhyMode((WiFiPhyMode_t)conf.wifi_phy_mode)) {
-      rlog_i("info", "Failed set phy mode %s", conf.wifi_phy_mode);
-    }
+    WiFi.setPhyMode((WiFiPhyMode_t)conf.wifi_phy_mode);
   }
   
   // if (!WiFi.getAutoConnect()) {
@@ -69,11 +65,9 @@ void wifiBegin(BoardConfig &conf) {
     
     fallback_dns_server.fromString(DEF_FALLBACK_DNS); 
     WiFi.config(conf.ip, conf.gateway, conf.mask, conf.gateway, fallback_dns_server);
-    rlog_i("info", "WiFi static address.");
   }
 
   WiFi.hostname(getDeviceName());
-  rlog_i("info", "WiFi host name done.");
 
   delay(100); // подождем чтобы проинициализировалась сеть
 
@@ -83,7 +77,6 @@ void wifiBegin(BoardConfig &conf) {
   else {
     WiFi.begin(conf.ssid, conf.password);
   }
-  rlog_i("info", "WiFi begin.");
 
   WiFi.waitForConnectResult(ESP_CONNECT_TIMEOUT);
 }
@@ -120,18 +113,16 @@ bool wifiConnect(BoardConfig &conf) {
   rlog_i("info", "WIFI: Connecting...");
   int attempts = WIFI_CONNECT_ATTEMPTS;
   do {
-    rlog_i("info", "WIFI: attempt %d of %d", WIFI_CONNECT_ATTEMPTS - attempts + 1, WIFI_CONNECT_ATTEMPTS);
     wifiBegin(conf);
-    rlog_i("info", "WiFi begin done.");
     if (WiFi.isConnected()) {
       conf.wifi_channel = WiFi.channel(); // сохраняем для быстрого коннекта
       uint8_t *bssid = WiFi.BSSID();
       memcpy((void *)&conf.wifi_bssid, (void *)bssid, sizeof(conf.wifi_bssid)); // сохраняем для быстрого коннекта
-      rlog_i("info", "WIFI: Connected.");
-      rlog_i("info", "WIFI: SSID: %s", WiFi.SSID().c_str());
-      rlog_i("info", "WIFI: Channel: %d", WiFi.channel());
-      rlog_i("info", "WIFI: BSSID: %s", WiFi.BSSIDstr().c_str());
-      rlog_i("info", "WIFI: Time spent %d ms", millis() - start_time);
+      // rlog_i("info", "WIFI: Connected.");
+      // rlog_i("info", "WIFI: SSID: %s", WiFi.SSID().c_str());
+      // rlog_i("info", "WIFI: Channel: %d", WiFi.channel());
+      // rlog_i("info", "WIFI: BSSID: %s", WiFi.BSSIDstr().c_str());
+      // rlog_i("info", "WIFI: Time spent %d ms", millis() - start_time);
       return true;
     }
     conf.wifi_channel = 0;
@@ -139,6 +130,5 @@ bool wifiConnect(BoardConfig &conf) {
     rlog_i("info", "WIFI: Connection failed.");
   } while (--attempts);
   
-  rlog_i("info", "WIFI: Connection failed, time spent %d ms", millis() - start_time);
   return false;
 }

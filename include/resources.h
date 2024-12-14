@@ -31,7 +31,7 @@ static const char u_rssi[] PROGMEM      = "dBm";
 static const char n_time[] PROGMEM      = "Last seen";
 static const char n_mac[] PROGMEM       = "MAC Address";
 static const char n_chip[] PROGMEM      = "Chip";
-static const char n_send_per[] PROGMEM  = "Data send period";
+static const char n_send_per[] PROGMEM  = "Send every";
 static const char u_min[] PROGMEM       = "min";
 static const char n_ip[] PROGMEM        = "IP Address";
 // ids
@@ -73,7 +73,7 @@ static const char *const CHANNEL_ENTITIES[][MQTT_PARAM_COUNT] PROGMEM = {
     {s_sensor, n_temp,    i_temp,    c_measurement,  d_temp,    u_temp,    cat_diag,  ""}
 };
 
-static const char s_VccTemp[] PROGMEM = "Vcc Temp Monitor";
+static const char s_VccTemp[] PROGMEM = "VccTemp Monitor";
 static const char *const CHANNEL_NAMES[CHANNEL_COUNT] PROGMEM = {s_VccTemp};
 
 static const char s_classic[] PROGMEM = "Classic";

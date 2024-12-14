@@ -123,12 +123,8 @@ String buildEntity( const char *mqtt_topic,
     entity[F("qos")] = 1;
   }
 
-  rlog_i("info", "MQTT: DISCOVERY SENSOR: JSON Mem usage: %d", json_doc.memoryUsage());
-  rlog_i("info", "MQTT: DISCOVERY SENSOR: JSON size: %d", measureJson(json_doc));
-
   String payload;
   serializeJson(entity, payload);
-  rlog_i("info", "MQTT: DISCOVERY Entity payload: %s", payload.c_str());
 
   return payload;
 }
@@ -191,8 +187,6 @@ void publishEntity(PubSubClient &mqtt_client, String &topic, String &discovery_t
     device_manufacturer = F(BRAND_NAME);
   }
   
-  rlog_i("info", "MQTT: DISCOVERY:  Sensor: %s", entity_name.c_str());
-  
   if ((attrs_index != NONE) && (attrs_count != NONE)) {
     json_attributes_topic = topic;
     json_attributes_template = getAttributesTemplate(entities, attrs_index, attrs_count, channel);
@@ -236,16 +230,12 @@ void publishChannelEntities(PubSubClient &mqtt_client, String &topic, String &di
 
 void publishHA(PubSubClient &mqtt_client, String &topic, String &discovery_topic) {
   
-  rlog_i("info", "MQTT: Publishing HA topic");
   unsigned long start_time = millis();
   String device_id = String(ESP.getChipId());
   String device_mac = getMacAddressHex();
 
-  rlog_i("info", "MQTT: General entities");
   publishGeneralEntities(mqtt_client, topic, discovery_topic, device_id, device_mac);
 
   // rlog_i("info", "MQTT: Channel entities");
   // publishChannelEntities(mqtt_client, topic, discovery_topic, device_id, device_mac);
-
-  rlog_i("info", "MQTT: Discovery topic published: %d ms", millis() - start_time);
 }
