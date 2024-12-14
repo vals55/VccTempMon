@@ -4,7 +4,6 @@
 
 #include "resources.h"
 #include "mqtt.h"
-#include "config.h"
 #include "json.h"
 
 #define MQTT_FORCE_UPDATE true

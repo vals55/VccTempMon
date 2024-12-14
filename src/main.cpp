@@ -269,7 +269,7 @@ void setup() {
         removeSlash(topic);
         publishData(mqttClient, topic, json_data, data.conf.mqtt_auto_discovery);
         String discovery_topic = data.conf.mqtt_discovery_topic;
-        // publishHA(mqttClient, topic, discovery_topic);
+        publishHA(mqttClient, topic, discovery_topic);
       }
     }
   

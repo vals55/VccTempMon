@@ -102,7 +102,7 @@ String buildEntity( const char *mqtt_topic,
     entity[F("cmd_tpl")] = F("{{value | round(0) | int}}");
     entity[F("mode")] = F("box");
     entity[F("min")] = 0;
-    entity[F("max")] = 70;
+    entity[F("max")] = 70;      //max value of deepsleep mode of esp8266 in min.
     entity[F("step")] = 1;
 
     entity[F("optimistic")] = true;
