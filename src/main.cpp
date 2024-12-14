@@ -13,6 +13,9 @@
 #include "buffer.h"
 #include "setup.h"
 #include "utils.h"
+#include "time_utils.h"
+#include "mqtt.h"
+#include "ha.h"
 
 #ifndef ESP8266
   #define ESP8266
@@ -33,10 +36,6 @@
 #include "rtc_utils.h"
 #endif
 
-#define WIFI_SSID "private-koptevo-wlan-bgn"
-#define WIFI_PASS "gfhfvjy2"
-#define URL "http://home.shokurov.ru/vcc"
-
 extern "C" {
 #include "user_interface.h"
 extern struct rst_info resetInfo;
@@ -53,6 +52,80 @@ String resetReason;
 bool wakeup = false;
 
 EEPROMBuff<BoardConfig> storage(8);
+
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
+
+bool updateConfig(String &topic, String &payload) {
+  bool updated = false;
+  int period = 0;
+
+  if (topic.endsWith(F("/set"))) {
+    int endslash = topic.lastIndexOf('/');
+    int prevslash = topic.lastIndexOf('/', endslash - 1);
+    String param = topic.substring(prevslash + 1, endslash);
+
+    rlog_i("info", "MQTT CALLBACK: Parameter %s", param.c_str());
+  
+    if (param.equals(F("send_period"))) {
+      period = payload.toInt();
+      if (period > 0) {
+        if (period != data.conf.sleep_period) {
+          data.conf.sleep_period = period;
+          updated = true;
+          rlog_i("info", "MQTT CALLBACK: new value of sleep_period: %d",  period);
+        }
+      }
+    }
+  }
+  return updated;
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  String mTopic = topic;
+  String mPayload;
+  bool updated = false;
+
+  mPayload.reserve(length);
+
+  rlog_i("info", "MQTT CALLBACK: Message arrived to: %s (len=%d)", mTopic.c_str(), length);
+  for (unsigned int i = 0; i < length; i++) {
+    mPayload += (char)payload[i];
+  }
+  updated = updateConfig(mTopic, mPayload);
+  rlog_i("info", "MQTT CALLBACK: Message payload: %s", mPayload.c_str());
+  mPayload.clear();
+  if(updated) {
+    storeConfig(data.conf);
+  }
+}
+
+bool reconnect() {
+  if (!isMQTT(data.conf)) {
+    return false;
+  }
+  String client_id = getDeviceName();
+  String topic = data.conf.mqtt_topic;
+  removeSlash(topic);
+  String subscribe_topic = topic + F(MQTT_ALL_TOPICS);
+  int attempts = MQTT_MAX_TRIES;
+  const char *login = data.conf.mqtt_login[0] ? data.conf.mqtt_login : NULL;
+  const char *pass = data.conf.mqtt_password[0] ? data.conf.mqtt_password : NULL;
+
+  rlog_i("info", "MQTT Connecting...");
+  while (!mqttClient.connected() && attempts--) {
+    rlog_i("info", "MQTT Attempt #%d from %d", MQTT_MAX_TRIES - attempts, MQTT_MAX_TRIES);
+    if (mqttClient.connect(client_id.c_str(), login, pass)) {
+      mqttClient.subscribe(subscribe_topic.c_str(), MQTT_QOS);
+      rlog_i("info", "MQTT subscribed to: %s", subscribe_topic.c_str());
+      return true;
+    } else {
+      rlog_i("info", "MQTT client connect failed with state %d", mqttClient.state());
+      delay(MQTT_CONNECT_DELAY);
+    }
+  }
+  return mqttClient.connected();
+}
 
 void setupBoard() {
   
@@ -172,12 +245,32 @@ void setup() {
     rlog_i("info", "sync_ntp_time = %d", success);
   }
 
+  if(isMQTT(data.conf) && (WiFi.status() == WL_CONNECTED)) {
+    rlog_i("info", "MQTT begin");
+    espClient.setTimeout(MQTT_SOCKET_TIMEOUT * 1000);
+    mqttClient.setBufferSize(MQTT_MAX_PACKET_SIZE);
+    mqttClient.setServer(data.conf.mqtt_host, data.conf.mqtt_port);
+    mqttClient.setSocketTimeout(MQTT_SOCKET_TIMEOUT);
+    mqttClient.setCallback(mqttCallback);
+  }
+
   if(WiFi.status() == WL_CONNECTED) {
     digitalWrite(BOARD_LED, LOW);
     getTempC(data.data);
     getJSONData(data, json_data);
+    
     if(isStat(data.conf)) {
-      sendHTTP(URL, json_data);
+      sendHTTP(data.conf.stat_host, json_data);
+    }
+    
+    if(isMQTT(data.conf)) {
+      if (reconnect()) {
+        String topic = data.conf.mqtt_topic;
+        removeSlash(topic);
+        publishData(mqttClient, topic, json_data, data.conf.mqtt_auto_discovery);
+        String discovery_topic = data.conf.mqtt_discovery_topic;
+        // publishHA(mqttClient, topic, discovery_topic);
+      }
     }
   
   #ifndef OTA_DISABLE

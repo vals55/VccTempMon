@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
 #include "utils.h"
 
 void flashLED() {
@@ -69,4 +70,18 @@ bool isHA(const BoardConfig &conf) {
 
 bool isDHCP(const BoardConfig &conf) {
 	return conf.ip != 0;
+}
+
+void removeSlash(String &str) {
+	if (str.endsWith(F("/"))) {
+		str.remove(str.length() - 1);
+	}
+}
+
+String getMacAddressHex() {
+	uint8_t baseMac[6];
+	char baseMacChr[13] = {0};
+	WiFi.macAddress(baseMac);
+	sprintf(baseMacChr, MAC_STR_HEX, baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+	return String(baseMacChr);
 }
