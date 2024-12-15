@@ -76,6 +76,6 @@ static const char *const CHANNEL_ENTITIES[][MQTT_PARAM_COUNT] PROGMEM = {
 static const char s_VccTemp[] PROGMEM = "VccTemp Monitor";
 static const char *const CHANNEL_NAMES[CHANNEL_COUNT] PROGMEM = {s_VccTemp};
 
-static const char s_classic[] PROGMEM = "Classic";
-static const char s_mod[] PROGMEM     = "Lite";
+static const char s_classic[] PROGMEM = "Vcc & Temp monitor";
+static const char s_mod[] PROGMEM     = "Mod Lite";
 static const char *const MODEL_NAMES[] PROGMEM = {s_classic, s_mod};

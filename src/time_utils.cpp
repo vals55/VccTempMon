@@ -13,7 +13,7 @@ bool syncTime(BoardConfig &conf) {
     yield();
     now = time(nullptr);
     attempts++;
-    if(attempts > NTP_ATTEMPTS) {
+    if (attempts > NTP_ATTEMPTS) {
       return false;
     }
     delay(500);

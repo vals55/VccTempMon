@@ -94,7 +94,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   }
   updated = updateConfig(mTopic, mPayload);
   mPayload.clear();
-  if(updated) {
+  if (updated) {
     storeConfig(data.conf);
     sleep_period = data.conf.sleep_period * 60e6;
 
@@ -242,12 +242,12 @@ void setup() {
     setupBoard();
   }
 
-  if(success && isNTP(data.conf)) {
+  if (success && isNTP(data.conf)) {
     success = syncTime(data.conf);
     rlog_i("info", "sync_ntp_time = %d", success);
   }
 
-  if(isMQTT(data.conf) && (WiFi.status() == WL_CONNECTED)) {
+  if (isMQTT(data.conf) && (WiFi.status() == WL_CONNECTED)) {
     rlog_i("info", "MQTT begin");
     espClient.setTimeout(MQTT_SOCKET_TIMEOUT * 1000);
     mqttClient.setBufferSize(MQTT_MAX_PACKET_SIZE);
@@ -256,16 +256,16 @@ void setup() {
     mqttClient.setCallback(mqttCallback);
   }
 
-  if(WiFi.status() == WL_CONNECTED) {
+  if (WiFi.status() == WL_CONNECTED) {
     digitalWrite(BOARD_LED, LOW);
     getTempC(data.data);
     getJSONData(data, json_data);
     
-    if(isStat(data.conf)) {
+    if (isStat(data.conf)) {
       sendHTTP(data.conf.stat_host, json_data);
     }
     
-    if(isMQTT(data.conf)) {
+    if (isMQTT(data.conf)) {
       if (reconnect()) {
         String topic = data.conf.mqtt_topic;
         removeSlash(topic);
@@ -281,9 +281,17 @@ void setup() {
   #ifndef OTA_DISABLE
     ArduinoOTA.begin();
   #endif
-  
   } else {
-    setupBoard();
+    uint8_t status = WiFi.status();
+    switch (status) {
+      case WL_WRONG_PASSWORD: {setupBoard(); break;}
+      case WL_CONNECTED: 
+      case WL_NO_SSID_AVAIL: 
+      case WL_CONNECT_FAILED: 
+      case WL_IDLE_STATUS: 
+      case WL_DISCONNECTED: 
+      default: 
+    }
   }
 
   digitalWrite(BOARD_LED, HIGH);
