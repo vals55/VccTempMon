@@ -5,7 +5,7 @@
 #include "rlog.h"
 #include "utils.h"
 
-#define WIFI_CONNECT_ATTEMPTS 32
+#define WIFI_CONNECT_ATTEMPTS 5
 #define WIFI_SET_MODE_ATTEMPTS 2
 #define DEF_FALLBACK_DNS "8.8.8.8"
 #define ESP_CONNECT_TIMEOUT 10000UL

@@ -16,7 +16,7 @@ void getJSONData(const Data &data, DynamicJsonDocument &json_data) {
   root[F("mac")]         = WiFi.macAddress();
   root[F("ip")]          = WiFi.localIP();
   root[F("count")]       = data.data.count;
-  root[F("send_period")]    = data.conf.sleep_period;
+  root[F("send_period")] = data.conf.sleep_period;
   root[F("ver")]         = String(data.conf.version);
   root[F("chip_id")]     = ESP.getChipId();
   root[F("freemem")]     = ESP.getFreeHeap();

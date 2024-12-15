@@ -49,7 +49,8 @@ float voltage = 0.0;
 uint64_t sleep_period = DEFAULT_SLEEP_PERIOD * 60e6;
 
 String resetReason;
-bool wakeup = false;
+bool sleep = true;
+bool taboo = false;
 
 EEPROMBuff<BoardConfig> storage(8);
 
@@ -65,7 +66,7 @@ bool updateConfig(String &topic, String &payload) {
     int prevslash = topic.lastIndexOf('/', endslash - 1);
     String param = topic.substring(prevslash + 1, endslash);
 
-    rlog_i("info", "MQTT CALLBACK: Parameter %s", param.c_str());
+    rlog_i("info", "MQTT CALLBACK: Parameter: %s", param.c_str());
   
     if (param.equals(F("send_period"))) {
       period = payload.toInt();
@@ -95,6 +96,12 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   mPayload.clear();
   if(updated) {
     storeConfig(data.conf);
+    sleep_period = data.conf.sleep_period * 60e6;
+
+    String topic = data.conf.mqtt_topic;
+    removeSlash(topic);
+    getJSONData(data, json_data);
+    publishData(mqttClient, topic, json_data, data.conf.mqtt_auto_discovery);
   }
 }
 
@@ -158,7 +165,7 @@ void setup() {
   // rlog_i("info", "version = %d", data.conf.version);
   // rlog_i("info", "ssid = %s", data.conf.ssid); 
   // rlog_i("info", "password = %s", data.conf.password);
-  rlog_i("info", "sleep_period = %d", data.conf.sleep_period);
+  // rlog_i("info", "sleep_period = %d", data.conf.sleep_period);
   // rlog_i("info", "mqtt_host = %s", data.conf.mqtt_host);
   // rlog_i("info", "mqtt_port = %d", data.conf.mqtt_port);
   // rlog_i("info", "mqtt_login = %s", data.conf.mqtt_login);
@@ -186,24 +193,24 @@ void setup() {
   
   switch(resetInfo.reason) {
     // normal startup by power on
-    case REASON_DEFAULT_RST:      wakeup = false; break;
+    case REASON_DEFAULT_RST:      //{sleep = true; break;}
     // hardware watch dog reset
-    case REASON_WDT_RST:          wakeup = false; break;
+    case REASON_WDT_RST:          //{sleep = true; break;}
     // exception reset, GPIO status won’t change
-    case REASON_EXCEPTION_RST:    wakeup = false; break;
+    case REASON_EXCEPTION_RST:    //{sleep = true; break;}
     // software watch dog reset, GPIO status won’t change
-    case REASON_SOFT_WDT_RST:     wakeup = false; break;
+    case REASON_SOFT_WDT_RST:     //{sleep = true; break;}
     // software restart ,system_restart , GPIO status won’t change
-    case REASON_SOFT_RESTART:     wakeup = false; break;
+    case REASON_SOFT_RESTART:     //{sleep = true; break;}
     // wake up from deep-sleep
-    case REASON_DEEP_SLEEP_AWAKE: wakeup = false; break;
+    case REASON_DEEP_SLEEP_AWAKE: {sleep = true; break;}
     // external system reset
-    case REASON_EXT_SYS_RST:      wakeup = true; break;
-    default:                      wakeup = false; break;
+    case REASON_EXT_SYS_RST:      {sleep = false; taboo = true; break;}
+    default:                      {sleep = true; break;}
   }
   
   resetReason = ESP.getResetReason();
-  rlog_i("info", "Reset reason: >%s< wakeup = %d", resetReason.c_str(), wakeup);
+  rlog_i("info", "Reset reason: >%s< to sleep = %d taboo = %d", resetReason.c_str(), sleep, taboo);
 
   flashLED();
   
@@ -265,13 +272,20 @@ void setup() {
         publishData(mqttClient, topic, json_data, data.conf.mqtt_auto_discovery);
         String discovery_topic = data.conf.mqtt_discovery_topic;
         publishHA(mqttClient, topic, discovery_topic);
+
+        mqttClient.loop();
+        sleep = false;
       }
     }
   
   #ifndef OTA_DISABLE
     ArduinoOTA.begin();
   #endif
+  
+  } else {
+    setupBoard();
   }
+
   digitalWrite(BOARD_LED, HIGH);
 }
 
@@ -279,10 +293,14 @@ bool flag = false;
 uint32_t btnTimer = 0;
 uint32_t waitTimer = 0;
 uint32_t secTimer = 0;
+uint32_t mqttTimer = 0;
+bool skip = true;
 
 void loop() {
   
-  if (!wakeup) {
+  mqttClient.loop();
+
+  if (sleep) {
     delay (1000);
     rlog_i("info", "System is going to sleep...");
     ESP.deepSleep (sleep_period);
@@ -308,8 +326,8 @@ void loop() {
   
   if (!btnState && flag && millis() - btnTimer > BTN_CLICK) {
     btnTimer = millis();
+    rlog_i("info loop >>>>>", "MAKE CLICK and RESTART");
     ESP.restart();
-    rlog_i("info loop >>>>>", "MAKE CLICK");
   }
   
   if (!btnState && flag && millis() - btnTimer > 100) {
@@ -326,6 +344,14 @@ void loop() {
     ESP.restart();
   }
   
+  if (millis() - mqttTimer >= 1 * PERIOD_SEC) {
+    mqttTimer = millis();
+    if (!sleep && !skip && !taboo) {
+      sleep = true;
+    }
+    skip = !skip;
+  }
+
   if (millis() - secTimer >= 1 * PERIOD_SEC) {
     secTimer = millis();
     flashLED();
