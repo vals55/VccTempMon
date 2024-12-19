@@ -44,6 +44,8 @@
 #define DEFAULT_NTP_SERVER "ru.pool.ntp.org"
 #define DEFAULT_TZ 3
 
+#define DEFAULT_COEFF 16.45
+
 //time
 #define PERIOD_SEC 1000
 #define PERIOD_MIN 60 * 1000
@@ -57,6 +59,7 @@ struct BoardConfig {
     char ssid[SSID_LEN] = {0}; 
     char password[PASSW_LEN] = {0};
 
+    double coeff = DEFAULT_COEFF;
     uint16_t sleep_period = 60;
 
     char     mqtt_host[MQTT_HOST_LEN] = {0};
@@ -79,7 +82,7 @@ struct BoardConfig {
     uint8_t wifi_bssid[6] = {0};
     uint8_t wifi_channel = 0;
     uint8_t wifi_phy_mode = 3;
-}; // 471
+}; // 477
 
 inline void strncpy0(char *dest, const char *src, const size_t len) {
     strncpy(dest, src, len - 1);

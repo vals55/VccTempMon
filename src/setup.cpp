@@ -51,6 +51,9 @@ void startAP(BoardConfig &conf) {
   LongParameter param_sleep_period("sleep_period", "Период отправки показаний, мин.:", conf.sleep_period);
   wm.addParameter(&param_sleep_period);
 
+  FloatParameter param_coeff("coeff", "Поправочный коэфф. вольтметра:", conf.coeff);
+  wm.addParameter(&param_coeff);
+
   WiFiManagerParameter subtitle_mqtt("<h3>MQTT</h3>");
   wm.addParameter(&subtitle_mqtt);
 

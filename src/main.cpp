@@ -45,7 +45,7 @@ Data data;
 DynamicJsonDocument json_data(JSON_BUFFER);
 uint8_t attempt = 0;
 uint32_t raw = 0;
-float voltage = 0.0;
+double voltage = 0.0;
 uint64_t sleep_period = DEFAULT_SLEEP_PERIOD * 60e6;
 
 String resetReason;
@@ -60,6 +60,7 @@ PubSubClient mqttClient(espClient);
 bool updateConfig(String &topic, String &payload) {
   bool updated = false;
   int period = 0;
+  double coeff = DEFAULT_COEFF;
 
   if (topic.endsWith(F("/set"))) {
     int endslash = topic.lastIndexOf('/');
@@ -73,9 +74,24 @@ bool updateConfig(String &topic, String &payload) {
       if (period > 0) {
         if (period != data.conf.sleep_period) {
           data.conf.sleep_period = period;
+          sleep_period = period * 60e6;
+          if (json_data.containsKey("send_period")) {
+            json_data[F("send_period")] = period;
+          }
           updated = true;
           rlog_i("info", "MQTT CALLBACK: new value of sleep_period: %d",  period);
         }
+      }
+    }
+    if (param.equals(F("coeff"))) {
+      coeff = payload.toDouble();
+      if (coeff != data.conf.coeff) {
+        data.conf.coeff = coeff;
+        if (json_data.containsKey("coeff")) {
+          json_data[F("coeff")] = coeff;
+        }
+        updated = true;
+        rlog_i("info", "MQTT CALLBACK: new value of coeff: %f", coeff);
       }
     }
   }
@@ -96,11 +112,8 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   mPayload.clear();
   if (updated) {
     storeConfig(data.conf);
-    sleep_period = data.conf.sleep_period * 60e6;
-
     String topic = data.conf.mqtt_topic;
     removeSlash(topic);
-    getJSONData(data, json_data);
     publishData(mqttClient, topic, json_data, data.conf.mqtt_auto_discovery);
   }
 }
@@ -229,8 +242,8 @@ void setup() {
 // get voltage
   pinMode(A0, OUTPUT);
   raw = analogRead(A0);
-  voltage = raw / 1049.645;
-  voltage = voltage * (51.0 + 3.3) / 3.3;
+  voltage = raw / 1023.0;
+  voltage = (voltage * data.conf.coeff * 100.0 + 0.5) / 100.0;
   data.data.voltage = voltage;
 
 // try to connect
@@ -281,17 +294,8 @@ void setup() {
   #ifndef OTA_DISABLE
     ArduinoOTA.begin();
   #endif
-  } else {
-    uint8_t status = WiFi.status();
-    switch (status) {
-      case WL_WRONG_PASSWORD: {setupBoard(); break;}
-      case WL_CONNECTED: 
-      case WL_NO_SSID_AVAIL: 
-      case WL_CONNECT_FAILED: 
-      case WL_IDLE_STATUS: 
-      case WL_DISCONNECTED: 
-      default: 
-    }
+  } else if (WiFi.status() == WL_WRONG_PASSWORD) {
+    setupBoard();
   }
 
   digitalWrite(BOARD_LED, HIGH);
@@ -356,6 +360,7 @@ void loop() {
     mqttTimer = millis();
     if (!sleep && !skip && !taboo) {
       sleep = true;
+      rlog_i("info loop >>>>>", "sleep is true!");
     }
     skip = !skip;
   }

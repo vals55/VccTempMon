@@ -5,8 +5,8 @@
 #include <Arduino.h>
 #include "config.h"
 struct Measurements {
-    float voltage;
-    float temp;
+    double voltage;
+    double temp;
     uint16_t count;
 };
 

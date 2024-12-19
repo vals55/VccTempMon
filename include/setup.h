@@ -35,7 +35,7 @@ public:
 class FloatParameter : public WiFiManagerParameter {
 public:
     FloatParameter(const char *id, const char *placeholder, float value, const uint8_t length = 10) : WiFiManagerParameter("") {
-        init(id, placeholder, String(value, 3).c_str(), length, " type=\"number\" step=\"0.01\" placeholder=\"0,00\"", WFM_LABEL_BEFORE);
+        init(id, placeholder, String(value, 2).c_str(), length, " type=\"number\" step=\"0.01\" placeholder=\"0,00\"", WFM_LABEL_BEFORE);
     }
     float getValue() {
         String val(WiFiManagerParameter::getValue());

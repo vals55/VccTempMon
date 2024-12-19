@@ -19,7 +19,7 @@ uint8_t deviceCount = 0;
 
 void getTempC(Measurements &data) {
 
-  data.temp = 0.0f;
+  data.temp = 0.0;
 
   sensors.begin();
   deviceCount = sensors.getDeviceCount();

@@ -12,6 +12,7 @@ void getJSONData(const Data &data, DynamicJsonDocument &json_data) {
 
   root[F("voltage")]     = data.data.voltage;
   root[F("temperature")] = data.data.temp;
+  root[F("coeff")]       = data.conf.coeff;
   root[F("rssi")]        = WiFi.RSSI();
   root[F("mac")]         = WiFi.macAddress();
   root[F("ip")]          = WiFi.localIP();

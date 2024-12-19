@@ -26,6 +26,8 @@ static const char n_voltage[] PROGMEM   = "Voltage";
 static const char u_voltage[] PROGMEM   = "V";
 static const char n_temp[] PROGMEM      = "Temperature";
 static const char u_temp[] PROGMEM      = "°С";
+static const char n_coeff[] PROGMEM     = "Tuning factor";
+static const char u_coeff[] PROGMEM     = "";
 static const char n_rssi[] PROGMEM      = "RSSI";
 static const char u_rssi[] PROGMEM      = "dBm";
 static const char n_time[] PROGMEM      = "Last seen";
@@ -37,6 +39,7 @@ static const char n_ip[] PROGMEM        = "IP Address";
 // ids
 static const char i_voltage[] PROGMEM   = "voltage";
 static const char i_temp[] PROGMEM      = "temperature";
+static const char i_coeff[] PROGMEM     = "coeff";
 static const char i_rssi[] PROGMEM      = "rssi";
 static const char i_time[] PROGMEM      = "timestamp";
 static const char i_mac[] PROGMEM       = "mac";
@@ -52,6 +55,7 @@ static const char icon_temp[] PROGMEM       = "mdi:thermometer-lines";
 static const char icon_rssi[] PROGMEM       = "mdi:wifi";
 static const char icon_period[] PROGMEM     = "mdi:timer-cog-outline";
 static const char icon_last_seen[] PROGMEM  = "mdi:clock-outline";
+static const char icon_coeff[] PROGMEM      = "mdi:tune-variant";
 
 static const char *const GENERAL_ENTITIES[][MQTT_PARAM_COUNT] PROGMEM = {
     // type,    name,       sensor_id,  state_class,    dev_class,   unit,       cat,       icon
@@ -60,6 +64,7 @@ static const char *const GENERAL_ENTITIES[][MQTT_PARAM_COUNT] PROGMEM = {
     {s_sensor,  n_temp,     i_temp,     c_measurement,  d_temp,      u_temp,     "",        icon_temp},
     {s_sensor,  n_time,     i_time,     "",             d_timestamp, "",         cat_diag,  icon_last_seen},
     {s_number,  n_send_per, i_send_per, "",             d_duration,  u_min,      cat_conf,  icon_period},
+    {s_float,   n_coeff,    i_coeff,    "",             "",          u_coeff,    cat_conf,  icon_coeff},
     {s_sensor,  n_rssi,     i_rssi,     c_measurement,  d_rssi,      u_rssi,     cat_diag,  icon_rssi},
     {s_sensor,  n_ip,       i_ip,       "",             "",          "",         cat_diag,  ""},
     {s_sensor,  n_mac,      i_mac,      "",             "",          "",         cat_diag,  ""},
@@ -76,6 +81,6 @@ static const char *const CHANNEL_ENTITIES[][MQTT_PARAM_COUNT] PROGMEM = {
 static const char s_VccTemp[] PROGMEM = "VccTemp Monitor";
 static const char *const CHANNEL_NAMES[CHANNEL_COUNT] PROGMEM = {s_VccTemp};
 
-static const char s_classic[] PROGMEM = "Vcc & Temp monitor";
+static const char s_classic[] PROGMEM = "VccTemp Monitor";
 static const char s_mod[] PROGMEM     = "Mod Lite";
 static const char *const MODEL_NAMES[] PROGMEM = {s_classic, s_mod};

@@ -32,6 +32,7 @@ CREATE TABLE `vcc_stat` (
   `id` int(11) NOT NULL,
   `voltage` float DEFAULT NULL,
   `temperature` float DEFAULT NULL,
+  `coeff` float DEFAULT NULL,
   `rssi` int(11) DEFAULT NULL,
   `mac` varchar(20) DEFAULT NULL,
   `ip` varchar(20) DEFAULT NULL,
