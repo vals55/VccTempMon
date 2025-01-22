@@ -25,13 +25,13 @@
 #define BTN_HOLD_SETUP 5000
 #define BTN_CLICK 200
 
-#define OTA_DISABLE
+//#define OTA_DISABLE
 #ifndef OTA_DISABLE
   #include <WiFiUdp.h>
   #include <ArduinoOTA.h>
 #endif
 
-//#define RTC_ENABLE
+#define RTC_ENABLE
 #ifdef RTC_ENABLE
 #include "rtc_utils.h"
 #endif
@@ -60,6 +60,7 @@ PubSubClient mqttClient(espClient);
 bool updateConfig(String &topic, String &payload) {
   bool updated = false;
   int period = 0;
+  int interval = 0;
   double coeff = DEFAULT_COEFF;
 
   if (topic.endsWith(F("/set"))) {
@@ -92,6 +93,17 @@ bool updateConfig(String &topic, String &payload) {
         }
         updated = true;
         rlog_i("info", "MQTT CALLBACK: new value of coeff: %f", coeff);
+      }
+    }
+    if (param.equals(F("interval"))) {
+      interval = payload.toInt();
+      if (interval != data.conf.interval) {
+        data.conf.interval = interval;
+        if (json_data.containsKey("count")) {
+          json_data[F("count")] = interval;
+        }
+        updated = true;
+        rlog_i("info", "MQTT CALLBACK: new value of interval: %d", interval);
       }
     }
   }
@@ -226,25 +238,51 @@ void setup() {
   rlog_i("info", "Reset reason: >%s< to sleep = %d taboo = %d", resetReason.c_str(), sleep, taboo);
 
   flashLED();
-  
-  uint16_t count = 0;
-#ifdef RTC_ENABLE
-  bool rc = false;
 
-  rc = rtc_read(&count);
-  rlog_i("info", "RTC read count: %d rc = %d",  count, rc);
-  count++;
-  rc = rtc_write(&count);
-  rlog_i("info", "RTC write count: %d wrc = %d",  count, rc);
+  uint8_t count = data.conf.interval;
+  if(count > 16) count = 16;
+#ifdef RTC_ENABLE
+  struct Avg {
+    double raw[16] = {0.0};
+  };
+  uint8_t rc;
+  Avg avg;
+
+  rc = rtc_read(&avg);
+  rlog_i("info", "RTC read: rc = %d avg0 = %f avg1 = %f avg2 = %f", rc, avg.raw[0], avg.raw[1], avg.raw[2]);
+  // if(rc != 1) {
+  // }
 #endif  
-  data.data.count = count;
 
 // get voltage
   pinMode(A0, OUTPUT);
   raw = analogRead(A0);
-  voltage = raw / 1023.0;
-  voltage = (voltage * data.conf.coeff * 100.0 + 0.5) / 100.0;
+
+#ifdef RTC_ENABLE
+  double total = (double)raw;
+  rc = 16;
+  for(int i=15; i>0; i--) {
+    avg.raw[i] = avg.raw[i-1];
+    if(avg.raw[i] == 0.0 || i >= count) {
+      rc--;
+    } else {
+      total += avg.raw[i];
+    }
+  }
+  avg.raw[0] = (double)raw;
+  voltage = total / 1024.0 / (double)rc;
+  rlog_i("info", "average: interval = %d", rc);
+  rc = rtc_write(&avg);
+  rlog_i("info", "RTC write: rc = %d avg0 = %f avg1 = %f avg2 = %f voltage = %f", rc, avg.raw[0], avg.raw[1], avg.raw[2], voltage);
+#else  
+  voltage = raw / 1024.0;
+#endif  
+  
+  voltage = voltage * data.conf.coeff;
+  long mv  = voltage * 1000.0 + 0.5;
+  voltage = mv / 1000.0;
   data.data.voltage = voltage;
+  rlog_i("info", "average: mv = %d voltage = %f", mv, voltage);
 
 // try to connect
   success = wifiConnect(data.conf);

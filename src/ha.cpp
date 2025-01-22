@@ -209,15 +209,15 @@ void publishEntity(PubSubClient &mqtt_client, String &topic, String &discovery_t
 }
 
 void publishGeneralEntities(PubSubClient &mqtt_client, String &topic, String &discovery_topic, String &device_id, String &device_mac) {
-  // добавляем одиночные сенсоры из массива GENERAL_ENTITIES с индекса 0 ("Voltage") по 4 вкл., до 5 ("RSSI")
+  // добавляем одиночные сенсоры из массива GENERAL_ENTITIES с индекса 0 ("Voltage") по 5 вкл., до 6 ("RSSI")
   // всего 13 сенсоров без атрибутов
   bool extended = false;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 6; i++) {
     extended = i == 0; // в первый сенсор дописываем всю информацию про устройство
     publishEntity(mqtt_client, topic, discovery_topic, device_id, device_mac, GENERAL_ENTITIES, i, extended);
   }
-  // основной сенсор 5 ("RSSI") атрибуты 6,7,8 (ip, mac, chip)
-  publishEntity(mqtt_client, topic, discovery_topic, device_id, device_mac, GENERAL_ENTITIES, 5, false, 6, 3);
+  // основной сенсор 6 ("RSSI") атрибуты 7,8,9 (ip, mac, chip)
+  publishEntity(mqtt_client, topic, discovery_topic, device_id, device_mac, GENERAL_ENTITIES, 6, false, 7, 3);
 }
 
 void publishChannelEntities(PubSubClient &mqtt_client, String &topic, String &discovery_topic, String &device_id, String &device_mac) {

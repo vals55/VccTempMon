@@ -48,11 +48,14 @@ void startAP(BoardConfig &conf) {
       wifi_station_set_config(&sconf);
   }
 
-  LongParameter param_sleep_period("sleep_period", "Период отправки показаний, мин.:", conf.sleep_period);
+  LongParameter param_sleep_period("sleep_period", "Период отправки показаний, мин.:", conf.sleep_period, 2);
   wm.addParameter(&param_sleep_period);
 
   FloatParameter param_coeff("coeff", "Поправочный коэфф. вольтметра:", conf.coeff);
   wm.addParameter(&param_coeff);
+
+  ShortParameter param_interval("interval", "Сглаживающий интервал (0 - 16):", conf.interval, 2);
+  wm.addParameter(&param_interval);
 
   WiFiManagerParameter subtitle_mqtt("<h3>MQTT</h3>");
   wm.addParameter(&subtitle_mqtt);
@@ -160,6 +163,7 @@ void startAP(BoardConfig &conf) {
   strncpy0(conf.password, wm.getWiFiPass().c_str(), PASSW_LEN);
 
   conf.sleep_period = param_sleep_period.getValue();
+  conf.interval = param_interval.getValue();
  
   strncpy0(conf.mqtt_host, param_mqtt_host.getValue(), MQTT_HOST_LEN);
   conf.mqtt_port = param_mqtt_port.getValue();

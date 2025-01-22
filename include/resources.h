@@ -36,6 +36,8 @@ static const char n_chip[] PROGMEM      = "Chip";
 static const char n_send_per[] PROGMEM  = "Send every";
 static const char u_min[] PROGMEM       = "min";
 static const char n_ip[] PROGMEM        = "IP Address";
+static const char n_interval[] PROGMEM  = "Smoothing interval";
+static const char u_interval[] PROGMEM  = "";
 // ids
 static const char i_voltage[] PROGMEM   = "voltage";
 static const char i_temp[] PROGMEM      = "temperature";
@@ -46,6 +48,7 @@ static const char i_mac[] PROGMEM       = "mac";
 static const char i_chip[] PROGMEM      = "chip_id";
 static const char i_send_per[] PROGMEM  = "send_period";
 static const char i_ip[] PROGMEM        = "ip";
+static const char i_interval[] PROGMEM  = "interval";
 // category
 static const char cat_diag[] PROGMEM = "diagnostic";
 static const char cat_conf[] PROGMEM = "config";
@@ -56,6 +59,7 @@ static const char icon_rssi[] PROGMEM       = "mdi:wifi";
 static const char icon_period[] PROGMEM     = "mdi:timer-cog-outline";
 static const char icon_last_seen[] PROGMEM  = "mdi:clock-outline";
 static const char icon_coeff[] PROGMEM      = "mdi:tune-variant";
+static const char icon_interval[] PROGMEM   = "mdi:arrow-expand-horizontal";
 
 static const char *const GENERAL_ENTITIES[][MQTT_PARAM_COUNT] PROGMEM = {
     // type,    name,       sensor_id,  state_class,    dev_class,   unit,       cat,       icon
@@ -65,6 +69,7 @@ static const char *const GENERAL_ENTITIES[][MQTT_PARAM_COUNT] PROGMEM = {
     {s_sensor,  n_time,     i_time,     "",             d_timestamp, "",         cat_diag,  icon_last_seen},
     {s_number,  n_send_per, i_send_per, "",             d_duration,  u_min,      cat_conf,  icon_period},
     {s_float,   n_coeff,    i_coeff,    "",             "",          u_coeff,    cat_conf,  icon_coeff},
+    {s_number,  n_interval, i_interval, "",             "",          u_interval, cat_conf,  icon_interval},
     {s_sensor,  n_rssi,     i_rssi,     c_measurement,  d_rssi,      u_rssi,     cat_diag,  icon_rssi},
     {s_sensor,  n_ip,       i_ip,       "",             "",          "",         cat_diag,  ""},
     {s_sensor,  n_mac,      i_mac,      "",             "",          "",         cat_diag,  ""},

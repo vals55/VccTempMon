@@ -7,7 +7,6 @@
 struct Measurements {
     double voltage;
     double temp;
-    uint16_t count;
 };
 
 struct Data {

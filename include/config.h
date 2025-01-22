@@ -8,7 +8,7 @@
 #include <rLog.h>
 
 #define VERSION 1
-#define FIRMWARE_VERSION "0.20"
+#define FIRMWARE_VERSION "0.32"
 #define HARDWARE_VERSION "0.10"
 #define BRAND_NAME "VccMon"
 #define CLASSIC 0
@@ -55,6 +55,7 @@
 
 struct BoardConfig {
     uint8_t version = VERSION;
+    uint8_t interval = 0;
 
     char ssid[SSID_LEN] = {0}; 
     char password[PASSW_LEN] = {0};
@@ -82,7 +83,7 @@ struct BoardConfig {
     uint8_t wifi_bssid[6] = {0};
     uint8_t wifi_channel = 0;
     uint8_t wifi_phy_mode = 3;
-}; // 477
+}; // 478
 
 inline void strncpy0(char *dest, const char *src, const size_t len) {
     strncpy(dest, src, len - 1);
