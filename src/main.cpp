@@ -16,6 +16,9 @@
 #include "time_utils.h"
 #include "mqtt.h"
 #include "ha.h"
+#include "ina226.h"
+
+#define INA226_MODE
 
 #ifndef ESP8266
   #define ESP8266
@@ -44,7 +47,13 @@ extern struct rst_info resetInfo;
 Data data;
 DynamicJsonDocument json_data(JSON_BUFFER);
 uint8_t attempt = 0;
+#ifndef INA226_MODE
 uint32_t raw = 0;
+#else
+float raw = 0.0f;
+#define I2C_ADDRESS 0x40
+INA226 ina226(I2C_ADDRESS);
+#endif
 double voltage = 0.0;
 uint64_t sleep_period = DEFAULT_SLEEP_PERIOD * 60e6;
 
@@ -255,8 +264,18 @@ void setup() {
 #endif  
 
 // get voltage
+#ifndef INA226_MODE
   pinMode(A0, OUTPUT);
   raw = analogRead(A0);
+#else
+  Wire.begin();
+  rc = 16;
+  if (!ina226.begin()) {
+    rlog_i("info", "INA226 init fail.");
+    while (rc--) delay(5);
+  }
+  raw = ina226.getBusVoltage();
+#endif
 
 #ifdef RTC_ENABLE
   double total = (double)raw;
@@ -270,12 +289,20 @@ void setup() {
     }
   }
   avg.raw[0] = (double)raw;
-  voltage = total / 1024.0 / (double)rc;
-  rlog_i("info", "average: interval = %d", rc);
+  #ifndef INA226_MODE
+    voltage = total / 1024.0 / (double)rc;
+  #else
+    voltage = total / (double)rc;
+  #endif
+  rlog_i("info", "average: interval = %d coeff=%f", rc, data.conf.coeff);
   rc = rtc_write(&avg);
   rlog_i("info", "RTC write: rc = %d avg0 = %f avg1 = %f avg2 = %f voltage = %f", rc, avg.raw[0], avg.raw[1], avg.raw[2], voltage);
 #else  
+  #ifndef INA226_MODE
   voltage = raw / 1024.0;
+  #else
+  voltage = raw;
+  #endif
 #endif  
   
   voltage = voltage * data.conf.coeff;

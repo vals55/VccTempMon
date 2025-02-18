@@ -164,6 +164,7 @@ void startAP(BoardConfig &conf) {
 
   conf.sleep_period = param_sleep_period.getValue();
   conf.interval = param_interval.getValue();
+  conf.coeff = param_coeff.getValue();
  
   strncpy0(conf.mqtt_host, param_mqtt_host.getValue(), MQTT_HOST_LEN);
   conf.mqtt_port = param_mqtt_port.getValue();

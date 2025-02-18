@@ -8,8 +8,8 @@
 #include <rLog.h>
 
 #define VERSION 1
-#define FIRMWARE_VERSION "0.34"
-#define HARDWARE_VERSION "0.10"
+#define FIRMWARE_VERSION "0.50"
+#define HARDWARE_VERSION "0.20"
 #define BRAND_NAME "VccMon"
 #define CLASSIC 0
 #define LITE 1
@@ -44,7 +44,7 @@
 #define DEFAULT_NTP_SERVER "ru.pool.ntp.org"
 #define DEFAULT_TZ 3
 
-#define DEFAULT_COEFF 16.45
+#define DEFAULT_COEFF 1.0
 
 //time
 #define PERIOD_SEC 1000
