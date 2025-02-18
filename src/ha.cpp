@@ -112,11 +112,11 @@ String buildEntity( const char *mqtt_topic,
     // https://www.home-assistant.io/integrations/number.mqtt
     String command_topic = String(mqtt_topic) + F("/") + entity_id + F("/set");
     entity[F("cmd_t")] = command_topic;
-    entity[F("cmd_tpl")] = F("{{value | round(2) | float}}");
+    entity[F("cmd_tpl")] = F("{{value | round(4) | float}}");
     entity[F("mode")] = F("box");
-    entity[F("min")] = 0.0;
-    entity[F("max")] = 9999.99;
-    entity[F("step")] = 0.01;
+    entity[F("min")] = 1.0;
+    entity[F("max")] = 999.999;
+    entity[F("step")] = 0.001;
 
     entity[F("optimistic")] = true;
     entity[F("retain")] = true;

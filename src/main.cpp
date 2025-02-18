@@ -279,8 +279,8 @@ void setup() {
 #endif  
   
   voltage = voltage * data.conf.coeff;
-  long mv  = voltage * 1000.0 + 0.5;
-  voltage = mv / 1000.0;
+  long mv  = voltage * 10000.0 + 0.5;
+  voltage = mv / 10000.0;
   data.data.voltage = voltage;
   rlog_i("info", "average: mv = %d voltage = %f", mv, voltage);
 

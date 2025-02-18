@@ -57,7 +57,7 @@ static const char icon_voltage[] PROGMEM    = "mdi:flash-outline";
 static const char icon_temp[] PROGMEM       = "mdi:thermometer-lines";
 static const char icon_rssi[] PROGMEM       = "mdi:wifi";
 static const char icon_period[] PROGMEM     = "mdi:timer-cog-outline";
-static const char icon_last_seen[] PROGMEM  = "mdi:clock-outline";
+static const char icon_last_seen[] PROGMEM  = "mdi:clock-check-outline";
 static const char icon_coeff[] PROGMEM      = "mdi:tune-variant";
 static const char icon_interval[] PROGMEM   = "mdi:arrow-expand-horizontal";
 
