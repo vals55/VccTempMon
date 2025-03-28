@@ -8,7 +8,7 @@
 #include "data.h"
 #include <rlog.h>
 
-#define ONE_WIRE_BUS 12                 // Пин подключения OneWire шины, 0 (D2)
+#define ONE_WIRE_BUS 12                 // Пин подключения OneWire шины
 #define METHOD1                         // метод измерений
 
 OneWire oneWire(ONE_WIRE_BUS);          // Подключаем бибилотеку OneWire
