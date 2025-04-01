@@ -182,6 +182,17 @@ void setupBoard() {
   ESP.restart();
 }
 
+float getVoltage226() {
+  
+  Wire.begin();
+  uint8_t rc = 16;
+  if (!ina226.begin()) {
+    rlog_i("info", "INA226 init fail.");
+    while (rc--) delay(5);
+  }
+  return ina226.getBusVoltage();
+}
+
 void setup() {
 
 #ifdef DEBUG_INFO
@@ -268,13 +279,19 @@ void setup() {
   pinMode(A0, OUTPUT);
   raw = analogRead(A0);
 #else
-  Wire.begin();
+  // Wire.begin();
+  // rc = 16;
+  // if (!ina226.begin()) {
+  //   rlog_i("info", "INA226 init fail.");
+  //   while (rc--) delay(5);
+  // }
+  // raw = ina226.getBusVoltage();
   rc = 16;
-  if (!ina226.begin()) {
-    rlog_i("info", "INA226 init fail.");
-    while (rc--) delay(5);
+  raw = 70.0;
+  while(rc-- && raw > 50.0) {
+    delay(10);
+    raw = getVoltage226();
   }
-  raw = ina226.getBusVoltage();
 #endif
 
 #ifdef RTC_ENABLE
