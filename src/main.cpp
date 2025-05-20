@@ -50,7 +50,7 @@ uint8_t attempt = 0;
 #ifndef INA226_MODE
 uint32_t raw = 0;
 #else
-float raw = 0.0f;
+float raw = 100.0f;
 #define I2C_ADDRESS 0x40
 INA226 ina226(I2C_ADDRESS);
 #endif
@@ -286,11 +286,15 @@ void setup() {
   //   while (rc--) delay(5);
   // }
   // raw = ina226.getBusVoltage();
-  rc = 16;
-  raw = 70.0;
-  while(rc-- && raw > 50.0) {
+  int att = 16;
+  while(att-- && raw > 50.0f) {
     delay(10);
     raw = getVoltage226();
+    rlog_i("info", "INA226 get fail. raw=%f att=%d", raw, att);
+  }
+  if(att < 0) {
+    raw = 0.0f;
+    rlog_i("info", "INA226 exit. raw=%f att=%d", raw, att);
   }
 #endif
 
