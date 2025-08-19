@@ -8,7 +8,7 @@
 #include <rLog.h>
 
 #define VERSION 1
-#define FIRMWARE_VERSION "0.51"
+#define FIRMWARE_VERSION "0.53"
 #define HARDWARE_VERSION "0.20"
 #define BRAND_NAME "VccMon"
 #define CLASSIC 0
