@@ -255,7 +255,7 @@ void setup() {
   }
   
   resetReason = ESP.getResetReason();
-  rlog_i("info", "Reset reason: >%s< to sleep = %d taboo = %d", resetReason.c_str(), sleep, taboo);
+  rlog_i("info", "Reset reason: >%s< to sleep = %d taboo = %d info.reason=%d", resetReason.c_str(), sleep, taboo, resetInfo.reason);
 
   flashLED();
 
