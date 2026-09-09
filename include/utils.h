@@ -12,6 +12,7 @@
 #define PROTO_HTTPS "https"
 #define PROTO_HTTP "http"
 
+uint16_t getCRC16(const uint8_t *data, size_t length);
 uint16_t getCRC(const BoardConfig &conf);
 String getDeviceName();
 String getAppName();

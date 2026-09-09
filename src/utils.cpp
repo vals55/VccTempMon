@@ -11,6 +11,26 @@ void flashLED() {
   digitalWrite(BOARD_LED, HIGH);
 }
 
+uint16_t getCRC16(const uint8_t *data, size_t length) {
+	uint8_t *buf = (uint8_t *)data;
+	uint16_t crc = 0xffff, poly = 0xa001;
+	uint16_t i = 0;
+	uint16_t len = length;
+
+	for (i = 0; i < len; i++) {
+		crc ^= buf[i];
+		for (uint8_t j = 0; j < 8; j++) {
+			if (crc & 0x01) {
+				crc >>= 1;
+				crc ^= poly;
+			} else {
+				crc >>= 1;
+			}
+		}
+	}
+	return crc;
+}
+
 uint16_t getCRC(const BoardConfig &conf) {
 	uint8_t *buf = (uint8_t *)&conf;
 	uint16_t crc = 0xffff, poly = 0xa001;

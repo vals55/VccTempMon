@@ -60,11 +60,41 @@ uint64_t sleep_period = DEFAULT_SLEEP_PERIOD * 60e6;
 String resetReason;
 bool sleep = true;
 bool taboo = false;
+#ifdef RTC_ENABLE
+  struct Avg {
+    double raw[16] = {0.0};
+  };
+  struct RTC_Data {
+    uint16_t crc;
+    Avg avg;
+  };
+  RTC_Data rtcData;
+#endif
 
 EEPROMBuff<BoardConfig> storage(8);
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
+
+void setupBoard() {
+  
+  digitalWrite(BOARD_LED, LOW);
+  delay(10000);
+
+  WiFi.persistent(false);
+  WiFi.disconnect();
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+
+  wifiSetMode(WIFI_AP_STA);
+  delay(1000);
+
+  startAP(data.conf);
+
+  wifiShutdown();
+  
+  rlog_i("info", "Restart ESP");
+  ESP.restart();
+}
 
 bool updateConfig(String &topic, String &payload) {
   bool updated = false;
@@ -95,6 +125,18 @@ bool updateConfig(String &topic, String &payload) {
     }
     if (param.equals(F("coeff"))) {
       coeff = payload.toDouble();
+#ifdef RTC_ENABLE
+      rlog_i("info", "MQTT CALLBACK: value of coeff: %f", coeff);
+      if (coeff == SETUP_COEFF) {
+        rlog_i("info", "MQTT CALLBACK: force_setup is TRUE");
+        setupBoard();
+      }
+      if (coeff == WAKEUP_COEFF) {
+        sleep = false;
+        taboo = true;
+        rlog_i("info", "MQTT CALLBACK: force_wakeup is TRUE");
+      }
+#endif
       if (coeff != data.conf.coeff) {
         data.conf.coeff = coeff;
         if (json_data.containsKey("coeff")) {
@@ -160,26 +202,6 @@ bool reconnect() {
     }
   }
   return mqttClient.connected();
-}
-
-void setupBoard() {
-  
-  digitalWrite(BOARD_LED, LOW);
-  delay(10000);
-
-  WiFi.persistent(false);
-  WiFi.disconnect();
-  WiFi.setSleepMode(WIFI_NONE_SLEEP);
-
-  wifiSetMode(WIFI_AP_STA);
-  delay(1000);
-
-  startAP(data.conf);
-
-  wifiShutdown();
-  
-  rlog_i("info", "Restart ESP");
-  ESP.restart();
 }
 
 float getVoltage226() {
@@ -262,15 +284,12 @@ void setup() {
   uint8_t count = data.conf.interval;
   if(count > 16) count = 16;
 #ifdef RTC_ENABLE
-  struct Avg {
-    double raw[16] = {0.0};
-  };
   uint8_t rc;
-  Avg avg;
-
-  rc = rtc_read(&avg);
-  rlog_i("info", "RTC read: rc = %d avg0 = %f avg1 = %f avg2 = %f", rc, avg.raw[0], avg.raw[1], avg.raw[2]);
-  // if(rc != 1) {
+  rc = rtc_read(&rtcData);
+  uint16_t crc = getCRC16((uint8_t*)&rtcData + 2, sizeof(rtcData) - 2);
+  rlog_i("info", "RTC read: rc = %d avg0 = %f avg1 = %f avg2 = %f", rc, rtcData.avg.raw[0], rtcData.avg.raw[1], rtcData.avg.raw[2]);
+  rlog_i("info", "RTC read: crc=%04X rtc.crc=%04X", crc, rtcData.crc);
+  // if(rc == 1 && rtcData.crc == crc) {
   // }
 #endif  
 
@@ -302,22 +321,23 @@ void setup() {
   double total = (double)raw;
   rc = 16;
   for(int i=15; i>0; i--) {
-    avg.raw[i] = avg.raw[i-1];
-    if(avg.raw[i] == 0.0 || i >= count) {
+    rtcData.avg.raw[i] = rtcData.avg.raw[i-1];
+    if(rtcData.avg.raw[i] == 0.0 || i >= count) {
       rc--;
     } else {
-      total += avg.raw[i];
+      total += rtcData.avg.raw[i];
     }
   }
-  avg.raw[0] = (double)raw;
+  rtcData.avg.raw[0] = (double)raw;
   #ifndef INA226_MODE
     voltage = total / 1024.0 / (double)rc;
   #else
     voltage = total / (double)rc;
   #endif
   rlog_i("info", "average: interval = %d coeff=%f", rc, data.conf.coeff);
-  rc = rtc_write(&avg);
-  rlog_i("info", "RTC write: rc = %d avg0 = %f avg1 = %f avg2 = %f voltage = %f", rc, avg.raw[0], avg.raw[1], avg.raw[2], voltage);
+  rtcData.crc = getCRC16((uint8_t*)&rtcData + 2, sizeof(rtcData) - 2);
+  rc = rtc_write(&rtcData);
+  rlog_i("info", "RTC write: rc = %d avg0 = %f avg1 = %f avg2 = %f voltage = %f", rc, rtcData.avg.raw[0], rtcData.avg.raw[1], rtcData.avg.raw[2], voltage);
 #else  
   #ifndef INA226_MODE
   voltage = raw / 1024.0;

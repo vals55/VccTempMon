@@ -8,7 +8,7 @@
 #include <rLog.h>
 
 #define VERSION 1
-#define FIRMWARE_VERSION "0.53"
+#define FIRMWARE_VERSION "0.54"
 #define HARDWARE_VERSION "0.20"
 #define BRAND_NAME "VccMon"
 #define CLASSIC 0
@@ -45,6 +45,8 @@
 #define DEFAULT_TZ 3
 
 #define DEFAULT_COEFF 1.0
+#define SETUP_COEFF 999.999
+#define WAKEUP_COEFF 999.998
 
 //time
 #define PERIOD_SEC 1000
